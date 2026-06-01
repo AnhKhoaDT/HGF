@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hidden Gems Finder - Tài Liệu Kiến Trúc & Lộ Trình</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- MathJax for rendering LaTeX -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es6/decimal.js"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eefcf6',
+                            100: '#d3f7e8',
+                            200: '#aaf0d1',
+                            300: '#72e2b3',
+                            400: '#3bcb92',
+                            500: '#16b075',
+                            600: '#0b8e5c',
+                            700: '#0a714c',
+                            800: '#0c5a3e',
+                            900: '#0b4a34',
+                            950: '#05291e',
+                        },
+                        dark: {
+                            50: '#f6f6f7',
+                            100: '#e1e2e5',
+                            200: '#c2c5cb',
+                            300: '#9ba0aa',
+                            400: '#707784',
+                            500: '#565c6a',
+                            600: '#414754',
+                            700: '#333842',
+                            800: '#21252b',
+                            900: '#181a1f',
+                            950: '#0e1013',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0e1013;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #181a1f;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333842;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3bcb92;
+        }
+        /* Glassmorphism utility */
+        .glass {
+            background: rgba(24, 26, 31, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+<body class="text-dark-100 antialiased selection:bg-brand-500 selection:text-white">
+
+    <!-- Toast Notification (Custom alert) -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="glass border-brand-500/30 text-brand-400 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3">
+            <i data-lucide="check-circle" class="w-5 h-5 text-brand-400"></i>
+            <span id="toast-message" class="text-sm font-semibold">Đã sao chép vào bộ nhớ tạm!</span>
+        </div>
+    </div>
+
+    <!-- Layout Container -->
+    <div class="min-h-screen flex flex-col">
+        <!-- Top Navbar -->
+        <header class="sticky top-0 z-40 w-full glass border-b border-dark-800 px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-brand-500/10 rounded-xl border border-brand-500/30">
+                    <i data-lucide="gem" class="w-6 h-6 text-brand-400 animate-pulse"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-lg tracking-tight text-white bg-gradient-to-r from-brand-400 to-emerald-400 bg-clip-text text-transparent">Hidden Gems Finder</h1>
+                    <p class="text-xs text-dark-400 font-medium">Bản Đặc Tả Kiến Trúc & Lộ Trình Phát Triển</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20">
+                    <span class="w-2 h-2 rounded-full bg-brand-400 animate-ping"></span>
+                    Production Ready
+                </span>
+            </div>
+        </header>
+
+        <!-- Main Body Grid -->
+        <div class="flex-1 flex flex-col md:flex-row">
+            
+            <!-- Sidebar Navigation (Desktop only, scrollable) -->
+            <aside class="hidden md:block w-72 border-r border-dark-800 p-6 space-y-8 sticky top-[73px] h-[calc(100vh-73px)] overflow-y-auto bg-dark-950">
+                <div>
+                    <h3 class="text-xs font-bold text-dark-400 uppercase tracking-widest mb-4">Mục lục tài liệu</h3>
+                    <nav class="space-y-1">
+                        <a href="#tech-stack" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-dark-300 hover:text-white hover:bg-dark-900 transition-all group">
+                            <i data-lucide="layers" class="w-4 h-4 text-dark-500 group-hover:text-brand-400"></i>
+                            <span>I. Tech Stack Hiện Đại</span>
+                        </a>
+                        <a href="#features" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-dark-300 hover:text-white hover:bg-dark-900 transition-all group">
+                            <i data-lucide="sliders" class="w-4 h-4 text-dark-500 group-hover:text-brand-400"></i>
+                            <span>II. Phân Rã Tính Năng</span>
+                        </a>
+                        <a href="#roadmap" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-dark-300 hover:text-white hover:bg-dark-900 transition-all group">
+                            <i data-lucide="milestone" class="w-4 h-4 text-dark-500 group-hover:text-brand-400"></i>
+                            <span>III. Lộ Trình Phát Triển</span>
+                        </a>
+                        <a href="#directories" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-dark-300 hover:text-white hover:bg-dark-900 transition-all group">
+                            <i data-lucide="folder-tree" class="w-4 h-4 text-dark-500 group-hover:text-brand-400"></i>
+                            <span>IV. Cấu Trúc Thư Mục</span>
+                        </a>
+                        <a href="#postgis-schema" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-dark-300 hover:text-white hover:bg-dark-900 transition-all group">
+                            <i data-lucide="database" class="w-4 h-4 text-dark-500 group-hover:text-brand-400"></i>
+                            <span>V. Thiết Kế Database</span>
+                        </a>
+                        <a href="#optimization" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-dark-300 hover:text-white hover:bg-dark-900 transition-all group">
+                            <i data-lucide="zap" class="w-4 h-4 text-dark-500 group-hover:text-brand-400"></i>
+                            <span>VI. Thuật Toán Tối Ưu</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div class="pt-6 border-t border-dark-800">
+                    <div class="p-4 rounded-xl bg-gradient-to-br from-brand-950 to-dark-900 border border-brand-800/30">
+                        <h4 class="text-sm font-semibold text-white mb-1 flex items-center gap-1.5">
+                            <i data-lucide="help-circle" class="w-4 h-4 text-brand-400"></i>
+                            Yêu cầu hệ thống
+                        </h4>
+                        <p class="text-xs text-dark-400 leading-relaxed">
+                            Mã nguồn này được thiết kế để biên dịch chéo cho Android/iOS (Flutter 3.x) và phân phối backend thông qua kiến trúc Container (Docker/Go 1.22+).
+                        </p>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="flex-1 p-6 md:p-12 space-y-16 overflow-y-auto max-w-5xl mx-auto">
+                
+                <!-- Hero Section Banner -->
+                <section class="relative p-8 md:p-12 rounded-3xl overflow-hidden border border-brand-500/20 bg-gradient-to-r from-dark-900 via-dark-950 to-brand-950/20 shadow-2xl">
+                    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-brand-500/10 via-transparent to-transparent pointer-events-none"></div>
+                    <div class="relative z-10 max-w-3xl space-y-4">
+                        <div class="inline-flex gap-2 items-center bg-brand-500/10 border border-brand-500/30 text-brand-400 text-xs px-3 py-1.5 rounded-full font-bold">
+                            <i data-lucide="award" class="w-3.5 h-3.5"></i> KIẾN TRÚC DOANH NGHIỆP
+                        </div>
+                        <h2 class="text-3xl md:text-5xl font-black text-white leading-tight">
+                            Hệ Thống Săn Tìm <br>
+                            <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-emerald-400 to-cyan-400">"Góc Sống Ảo" & Quán Ẩn</span>
+                        </h2>
+                        <p class="text-dark-300 text-base md:text-lg leading-relaxed max-w-2xl">
+                            Bản thiết kế kỹ thuật hoàn chỉnh tích hợp công nghệ định vị AR thời gian thực (Augmented Reality), giải pháp phát video ngắn tối ưu hóa như TikTok, và hệ thống truy vấn không gian dựa trên cơ sở dữ liệu PostGIS mạnh mẽ.
+                        </p>
+                        <div class="flex flex-wrap gap-4 pt-4">
+                            <a href="#roadmap" class="bg-brand-500 hover:bg-brand-600 text-dark-950 font-bold px-6 py-3 rounded-xl transition-all shadow-lg hover:shadow-brand-500/20 flex items-center gap-2">
+                                <i data-lucide="play-circle" class="w-5 h-5"></i> Bắt đầu Lộ Trình
+                            </a>
+                            <a href="#directories" class="bg-dark-800 hover:bg-dark-700 text-white font-semibold px-6 py-3 rounded-xl border border-dark-700 transition-all flex items-center gap-2">
+                                <i data-lucide="code" class="w-5 h-5 text-dark-400"></i> Xem Cấu Trúc Thư Mục
+                            </a>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- I. TECH STACK -->
+                <section id="tech-stack" class="space-y-6">
+                    <div class="flex items-center gap-3 border-b border-dark-800 pb-3">
+                        <div class="p-2 bg-purple-500/10 rounded-lg border border-purple-500/30">
+                            <i data-lucide="layers" class="w-5 h-5 text-purple-400"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-white">I. Tech Stack Hiện Đại (Proposed Stack)</h3>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Mobile Client Card -->
+                        <div class="p-6 rounded-2xl border border-dark-800 bg-dark-900/50 hover:border-brand-500/30 transition-all group">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-lg font-bold text-white flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
+                                    Mobile Client (Flutter)
+                                </h4>
+                                <span class="text-xs px-2.5 py-1 rounded-md bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-mono">Frontend</span>
+                            </div>
+                            <ul class="space-y-3.5 text-sm text-dark-300">
+                                <li class="flex items-start gap-2.5">
+                                    <i data-lucide="chevron-right" class="w-4 h-4 text-brand-400 mt-1 shrink-0"></i>
+                                    <span><strong>State Management:</strong> <code class="text-cyan-400 font-mono text-xs">flutter_bloc</code> kết hợp với <code class="text-cyan-400 font-mono text-xs">freezed</code> để sinh mã hóa an toàn, không lỗi trạng thái.</span>
+                                </li>
+                                <li class="flex items-start gap-2.5">
+                                    <i data-lucide="chevron-right" class="w-4 h-4 text-brand-400 mt-1 shrink-0"></i>
+                                    <span><strong>Dependency Injection:</strong> <code class="text-cyan-400 font-mono text-xs">get_it</code> & <code class="text-cyan-400 font-mono text-xs">injectable</code> để tối ưu hóa việc quản lý vòng đời tài nguyên.</span>
+                                </li>
+                                <li class="flex items-start gap-2.5">
+                                    <i data-lucide="chevron-right" class="w-4 h-4 text-brand-400 mt-1 shrink-0"></i>
+                                    <span><strong>Networking:</strong> <code class="text-cyan-400 font-mono text-xs">dio</code> cho REST (Video/Auth) & <code class="text-cyan-400 font-mono text-xs">gRPC</code> cho các dữ liệu thời gian thực có hiệu năng siêu cao.</span>
+                                </li>
+                                <li class="flex items-start gap-2.5">
+                                    <i data-lucide="chevron-right" class="w-4 h-4 text-brand-400 mt-1 shrink-0"></i>
+                                    <span><strong>AR Engine:</strong> Tích hợp native qua MethodChannel (<code class="text-cyan-400 font-mono text-xs">ARCore</code> cho Android / <code class="text-cyan-400 font-mono text-xs">ARKit</code> cho iOS).</span>
+                                </li>
+                                <li class="flex items-start gap-2.5">
+                                    <i data-lucide="chevron-right" class="w-4 h-4 text-brand-400 mt-1 shrink-0"></i>
+                                    <span><strong>Video Player:</strong> <code class="text-cyan-400 font-mono text-xs">video_player</code> phối hợp với <code class="text-cyan-400 font-mono text-xs">preload_page_view</code> tối ưu tải trước mượt mà.</span>
+                                </li>
+                                <li class="flex items-start gap-2.5">
+                                    <i data-lucide="chevron-right" class="w-4 h-4 text-brand-400 mt-1 shrink-0"></i>
+                                    <span><strong>Local Cache:</strong> Sử dụng NoSQL <code class="text-cyan-400 font-mono text-xs">isar</code> siêu tốc để lưu trữ đệm dữ liệu ngoại tuyến (offline cache).</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Backend Card -->
+                        <div class="p-6 rounded-2xl border border-dark-800 bg-dark-900/50 hover:border-brand-500/30 transition-all group">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-lg font-bold text-white flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse"></span>
+                                    Backend Engine (Go)
+                                </h4>
+                                <span class="text-xs px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-400 border border-blue-500/20 font-mono">Services</span>
+                            </div>
+                            <ul class="space-y-3.5 text-sm text-dark-300">
+                                <li class="flex items-start gap-2.5">
+                                    <i data-lucide="chevron-right" class="w-4 h-4 text-brand-400 mt-1 shrink-0"></i>
+                                    <span><strong>Web Framework:</strong> <code class="text-blue-400 font-mono text-xs">Gin/Fiber</code> cho RESTful endpoints hiệu suất cao & <code class="text-blue-400 font-mono text-xs">gRPC-Go</code> phục vụ giao tiếp microservices.</span>
+                                </li>
+                                <li class="flex items-start gap-2.5">
+                                    <i data-lucide="chevron-right" class="w-4 h-4 text-brand-400 mt-1 shrink-0"></i>
+                                    <span><strong>Database & GIS:</strong> <code class="text-blue-400 font-mono text-xs">PostgreSQL</code> kèm phần mở rộng <code class="text-blue-400 font-mono text-xs">PostGIS</code> chuyên dụng tính toán dữ liệu bản đồ.</span>
+                                </li>
+                                <li class="flex items-start gap-2.5">
+                                    <i data-lucide="chevron-right" class="w-4 h-4 text-brand-400 mt-1 shrink-0"></i>
+                                    <span><strong>Caching & Pub/Sub:</strong> <code class="text-blue-400 font-mono text-xs">Redis</code> cho dữ liệu nóng và OTP; hàng đợi tin nhắn bất đồng bộ <code class="text-blue-400 font-mono text-xs">Kafka</code> hoặc <code class="text-blue-400 font-mono text-xs">RabbitMQ</code>.</span>
+                                </li>
+                                <li class="flex items-start gap-2.5">
+                                    <i data-lucide="chevron-right" class="w-4 h-4 text-brand-400 mt-1 shrink-0"></i>
+                                    <span><strong>Object Storage & CDN:</strong> <code class="text-blue-400 font-mono text-xs">Cloudflare R2</code> hoặc <code class="text-blue-400 font-mono text-xs">AWS S3</code> để lưu trữ thô; tích hợp <code class="text-blue-400 font-mono text-xs">Cloudflare Stream / Mux</code> để chuyển mã luồng.</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- II. FEATURE SPECIFICATION -->
+                <section id="features" class="space-y-6">
+                    <div class="flex items-center gap-3 border-b border-dark-800 pb-3">
+                        <div class="p-2 bg-emerald-500/10 rounded-lg border border-emerald-500/30">
+                            <i data-lucide="sliders" class="w-5 h-5 text-emerald-400"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-white">II. Phân Rã Chi Tiết Tính Năng (Feature Spec)</h3>
+                    </div>
+
+                    <div class="space-y-4">
+                        <!-- Feature 1 -->
+                        <div class="p-5 rounded-xl border border-dark-800 bg-dark-900/30 hover:bg-dark-900/50 transition-all">
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-brand-500/10 text-brand-400 font-bold text-sm">1</span>
+                                <h4 class="font-bold text-white text-base">Auth & User Management (Quản lý định danh)</h4>
+                            </div>
+                            <p class="text-sm text-dark-400 ml-11 leading-relaxed">
+                                Hỗ trợ đăng nhập đa phương thức qua <strong>Firebase Auth</strong> (Google, SMS, Apple). Trả Token ID về Go Backend để kiểm tra tính hợp lệ và phát hành JWT mã hóa riêng cho người dùng. Thiết kế thêm hệ thống "Trò chơi hóa" tích lũy điểm EXP khi người dùng đóng góp nội dung, thăng cấp từ "Nhà Thám Hiểm" đến "Thợ Săn Quán Ẩn".
+                            </p>
+                        </div>
+
+                        <!-- Feature 2 -->
+                        <div class="p-5 rounded-xl border border-dark-800 bg-dark-900/30 hover:bg-dark-900/50 transition-all">
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-brand-500/10 text-brand-400 font-bold text-sm">2</span>
+                                <h4 class="font-bold text-white text-base">Bản Đồ & Tìm Kiếm Không Gian (Geospatial)</h4>
+                            </div>
+                            <p class="text-sm text-dark-400 ml-11 leading-relaxed">
+                                Sử dụng bản đồ vector tùy chỉnh giao diện (Mapbox/Google Maps). Tính toán nhanh chóng bằng PostGIS để hiển thị toàn bộ địa điểm tiềm năng trong bán kính khảo sát được chọn lọc theo phong cách cụ thể (Chunky, Retro, Industrial...) hoặc mức độ thử thách để khám phá.
+                            </p>
+                        </div>
+
+                        <!-- Feature 3 -->
+                        <div class="p-5 rounded-xl border border-dark-800 bg-dark-900/30 hover:bg-dark-900/50 transition-all">
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-brand-500/10 text-brand-400 font-bold text-sm">3</span>
+                                <h4 class="font-bold text-white text-base">AR Wayfinder (Chỉ đường thực tế tăng cường)</h4>
+                            </div>
+                            <p class="text-sm text-dark-400 ml-11 leading-relaxed">
+                                Khi người dùng tiếp cận bán kính 100 mét gần "Gem", thiết bị cho phép kích hoạt chế độ Camera AR. Hệ thống kết hợp dữ liệu GPS của thiết bị, cảm biến la bàn số để chiếu bản dựng mũi tên 3D và thẻ thông tin nổi trên màn hình trực quan, hướng dẫn đi vào ngõ hẻm chính xác.
+                            </p>
+                        </div>
+
+                        <!-- Feature 4 -->
+                        <div class="p-5 rounded-xl border border-dark-800 bg-dark-900/30 hover:bg-dark-900/50 transition-all">
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-brand-500/10 text-brand-400 font-bold text-sm">4</span>
+                                <h4 class="font-bold text-white text-base">TikTok-style Video Review (Feed Luồng video ngắn)</h4>
+                            </div>
+                            <p class="text-sm text-dark-400 ml-11 leading-relaxed">
+                                Thao tác vuốt mượt mà để chuyển đổi video đánh giá góc sống ảo. Tích hợp chuyển mã HLS phân luồng chất lượng tương thích tốc độ kết nối internet. Tự động đệm trước (preloading) video kề cận giúp người xem không bị gián đoạn và tối ưu hóa tài nguyên RAM bộ nhớ đệm thiết bị.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- III. ROADMAP INTERACTIVE -->
+                <section id="roadmap" class="space-y-6">
+                    <div class="flex items-center gap-3 border-b border-dark-800 pb-3">
+                        <div class="p-2 bg-yellow-500/10 rounded-lg border border-yellow-500/30">
+                            <i data-lucide="milestone" class="w-5 h-5 text-yellow-400"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-white">III. Lộ Trình Phát Triển 5 Giai Đoạn</h3>
+                    </div>
+
+                    <!-- Vertical/Horizontal Interactive Timeline -->
+                    <div class="relative pl-8 border-l border-dark-850 space-y-10 py-2">
+                        <!-- Phase 1 -->
+                        <div class="relative group">
+                            <!-- Bullet -->
+                            <div class="absolute -left-[41px] top-1 bg-dark-950 p-1.5 rounded-full border border-brand-500/50 group-hover:border-brand-400 transition-all">
+                                <div class="w-3.5 h-3.5 bg-brand-500 rounded-full animate-pulse"></div>
+                            </div>
+                            <div class="space-y-2">
+                                <span class="text-xs font-bold text-brand-400 uppercase tracking-widest">GIAI ĐOẠN 1 • TUẦN 1 - 2</span>
+                                <h4 class="text-lg font-bold text-white">Thiết kế dữ liệu & Cấu trúc cơ bản</h4>
+                                <p class="text-sm text-dark-300 max-w-3xl">
+                                    <strong>Backend:</strong> Cài đặt máy chủ DB PostgreSQL + PostGIS, viết tệp lược đồ SQL chuẩn. Định nghĩa các bảng thực thể. <br>
+                                    <strong>Mobile:</strong> Khởi tạo khung dự án Flutter theo cấu trúc Clean Architecture, xây dựng định tuyến Router chính, thiết kế sơ đồ DI.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Phase 2 -->
+                        <div class="relative group">
+                            <!-- Bullet -->
+                            <div class="absolute -left-[41px] top-1 bg-dark-950 p-1.5 rounded-full border border-dark-700 group-hover:border-brand-400 transition-all">
+                                <div class="w-3.5 h-3.5 bg-dark-700 group-hover:bg-brand-500 rounded-full transition-all"></div>
+                            </div>
+                            <div class="space-y-2">
+                                <span class="text-xs font-bold text-brand-400 uppercase tracking-widest">GIAI ĐOẠN 2 • TUẦN 3 - 5</span>
+                                <h4 class="text-lg font-bold text-white">Core API & Thiết kế Giao Diện Mobile Cơ bản</h4>
+                                <p class="text-sm text-dark-300 max-w-3xl">
+                                    <strong>Backend:</strong> Phát triển các API phân quyền/xác thực người dùng, hệ thống CRUD địa điểm "Gems", định vị địa lý thô. <br>
+                                    <strong>Mobile:</strong> Hoàn thiện các màn hình chính (Trang chủ, Bản đồ tìm kiếm, Trang chi tiết quán và luồng đăng nhập).
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Phase 3 -->
+                        <div class="relative group">
+                            <!-- Bullet -->
+                            <div class="absolute -left-[41px] top-1 bg-dark-950 p-1.5 rounded-full border border-dark-700 group-hover:border-brand-400 transition-all">
+                                <div class="w-3.5 h-3.5 bg-dark-700 group-hover:bg-brand-500 rounded-full transition-all"></div>
+                            </div>
+                            <div class="space-y-2">
+                                <span class="text-xs font-bold text-brand-400 uppercase tracking-widest">GIAI ĐOẠN 3 • TUẦN 6 - 8</span>
+                                <h4 class="text-lg font-bold text-white">Video Streaming Integration</h4>
+                                <p class="text-sm text-dark-300 max-w-3xl">
+                                    <strong>Backend:</strong> Dựng cụm lưu trữ video gốc, thiết lập Webhook liên thông hệ thống chuyển mã tự động Cloudflare Stream/Mux. <br>
+                                    <strong>Mobile:</strong> Hoàn thiện giao diện feed video lướt mượt mà như TikTok. Triển khai cấu trúc giải phóng bộ nhớ và đệm cache cục bộ.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Phase 4 -->
+                        <div class="relative group">
+                            <!-- Bullet -->
+                            <div class="absolute -left-[41px] top-1 bg-dark-950 p-1.5 rounded-full border border-dark-700 group-hover:border-brand-400 transition-all">
+                                <div class="w-3.5 h-3.5 bg-dark-700 group-hover:bg-brand-500 rounded-full transition-all"></div>
+                            </div>
+                            <div class="space-y-2">
+                                <span class="text-xs font-bold text-brand-400 uppercase tracking-widest">GIAI ĐOẠN 4 • TUẦN 9 - 11</span>
+                                <h4 class="text-lg font-bold text-white">AR Wayfinder & Bản Đồ Nâng Cao</h4>
+                                <p class="text-sm text-dark-300 max-w-3xl">
+                                    <strong>Mobile:</strong> Tích hợp camera AR SDK, tính toán các góc cảm biến chuyển động la bàn cùng khoảng cách không gian thực tế để vẽ POI Card 3D chỉ đường. <br>
+                                    <strong>Backend:</strong> Thiết lập chỉ mục không gian Spatial Index (GIST) trên PostGIS và Redis Caching để tăng tốc độ phản hồi API dưới 30ms.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Phase 5 -->
+                        <div class="relative group">
+                            <!-- Bullet -->
+                            <div class="absolute -left-[41px] top-1 bg-dark-950 p-1.5 rounded-full border border-dark-700 group-hover:border-brand-400 transition-all">
+                                <div class="w-3.5 h-3.5 bg-dark-700 group-hover:bg-brand-500 rounded-full transition-all"></div>
+                            </div>
+                            <div class="space-y-2">
+                                <span class="text-xs font-bold text-brand-400 uppercase tracking-widest">GIAI ĐOẠN 5 • TUẦN 12 - 14</span>
+                                <h4 class="text-lg font-bold text-white">Tối ưu hiệu năng & Đưa lên Chợ ứng dụng</h4>
+                                <p class="text-sm text-dark-300 max-w-3xl">
+                                    Kiểm tra rò rỉ RAM (Memory Leak) khi sử dụng camera AR liên tục. Kiểm thử hiệu năng máy chủ Go bằng <code class="text-brand-400 font-mono text-xs">k6</code> để chịu tải 10,000 CCU. Đóng gói Docker Container, cấu hình CI/CD và xuất bản lên Google Play/App Store.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- IV. DIRECTORIES STRUCTURE (INTERACTIVE FILE TREE) -->
+                <section id="directories" class="space-y-6">
+                    <div class="flex items-center gap-3 border-b border-dark-800 pb-3">
+                        <div class="p-2 bg-blue-500/10 rounded-lg border border-blue-500/30">
+                            <i data-lucide="folder-tree" class="w-5 h-5 text-blue-400"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-white">IV. Cấu Trúc Thư Mục Chuẩn Công Nghiệp</h3>
+                    </div>
+
+                    <!-- Directory tabs -->
+                    <div class="flex gap-2 p-1 bg-dark-950 rounded-xl border border-dark-800 max-w-sm">
+                        <button onclick="switchTree('flutter')" id="btn-flutter" class="flex-1 py-2 text-sm font-semibold rounded-lg bg-brand-500 text-dark-950 transition-all">
+                            Flutter (Mobile)
+                        </button>
+                        <button onclick="switchTree('go')" id="btn-go" class="flex-1 py-2 text-sm font-semibold rounded-lg text-dark-400 hover:text-white transition-all">
+                            Go (Backend)
+                        </button>
+                    </div>
+
+                    <!-- FLUTTER TREE -->
+                    <div id="tree-flutter" class="p-6 rounded-2xl border border-dark-800 bg-dark-900/40 font-mono text-sm text-dark-300 overflow-x-auto">
+                        <div class="mb-4 text-xs font-semibold text-brand-400 flex items-center gap-1.5 uppercase tracking-wider">
+                            <i data-lucide="info" class="w-3.5 h-3.5"></i> Cấu trúc Feature-First + Clean Architecture
+                        </div>
+                        <!-- Interactive folders -->
+                        <div class="space-y-1 select-none">
+                            <div class="flex items-center gap-2 py-0.5"><i data-lucide="folder-open" class="w-4 h-4 text-brand-400"></i> <span class="text-white">lib/</span></div>
+                            
+                            <!-- core folder -->
+                            <div class="pl-4">
+                                <div class="flex items-center gap-2 cursor-pointer py-0.5 hover:text-white" onclick="toggleFolder('folder-core')">
+                                    <i data-lucide="chevron-down" id="arrow-core" class="w-3.5 h-3.5 text-dark-500 transition-transform"></i>
+                                    <i data-lucide="folder" class="w-4 h-4 text-yellow-500"></i>
+                                    <span>core/</span>
+                                    <span class="text-xs text-dark-500 italic">// Chứa tài nguyên dùng chung cho toàn bộ app</span>
+                                </div>
+                                <div id="folder-core" class="pl-6 border-l border-dark-800 space-y-1 my-1">
+                                    <div class="flex items-center gap-2 py-0.5"><i data-lucide="folder" class="w-4 h-4 text-yellow-500"></i> <span>constants/</span></div>
+                                    <div class="flex items-center gap-2 py-0.5"><i data-lucide="folder" class="w-4 h-4 text-yellow-500"></i> <span>theme/</span></div>
+                                    <div class="flex items-center gap-2 py-0.5"><i data-lucide="folder" class="w-4 h-4 text-yellow-500"></i> <span>network/</span></div>
+                                    <div class="flex items-center gap-2 py-0.5"><i data-lucide="folder" class="w-4 h-4 text-yellow-500"></i> <span>errors/</span></div>
+                                    <div class="flex items-center gap-2 py-0.5"><i data-lucide="folder" class="w-4 h-4 text-yellow-500"></i> <span>utils/</span></div>
+                                </div>
+                            </div>
+
+                            <!-- features folder -->
+                            <div class="pl-4">
+                                <div class="flex items-center gap-2 cursor-pointer py-0.5 hover:text-white" onclick="toggleFolder('folder-features')">
+                                    <i data-lucide="chevron-down" id="arrow-features" class="w-3.5 h-3.5 text-dark-500 transition-transform"></i>
+                                    <i data-lucide="folder" class="w-4 h-4 text-yellow-500"></i>
+                                    <span>features/</span>
+                                    <span class="text-xs text-dark-500 italic">// Chia gọn theo các cụm tính năng</span>
+                                </div>
+                                <div id="folder-features" class="pl-6 border-l border-dark-800 space-y-1 my-1">
+                                    
+                                    <!-- auth feature -->
+                                    <div>
+                                        <div class="flex items-center gap-2 cursor-pointer py-0.5 hover:text-white" onclick="toggleFolder('folder-feat-auth')">
+                                            <i data-lucide="chevron-right" id="arrow-feat-auth" class="w-3.5 h-3.5 text-dark-500 transition-transform"></i>
+                                            <i data-lucide="folder" class="w-4 h-4 text-emerald-500"></i>
+                                            <span>auth/</span>
+                                        </div>
+                                        <div id="folder-feat-auth" class="hidden pl-6 border-l border-dark-800 space-y-1 my-1">
+                                            <div class="flex items-center gap-2 py-0.5"><i data-lucide="folder" class="w-4 h-4 text-amber-500"></i> <span>data/</span> <span class="text-xs text-dark-500">(datasources, models, repos)</span></div>
+                                            <div class="flex items-center gap-2 py-0.5"><i data-lucide="folder" class="w-4 h-4 text-amber-500"></i> <span>domain/</span> <span class="text-xs text-dark-500">(entities, usecases, interfaces)</span></div>
+                                            <div class="flex items-center gap-2 py-0.5"><i data-lucide="folder" class="w-4 h-4 text-amber-500"></i> <span>presentation/</span> <span class="text-xs text-dark-500">(blocs, pages, widgets)</span></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- gems_feed feature -->
+                                    <div>
+                                        <div class="flex items-center gap-2 cursor-pointer py-0.5 hover:text-white" onclick="toggleFolder('folder-feat-gems')">
+                                            <i data-lucide="chevron-right" id="arrow-feat-gems" class="w-3.5 h-3.5 text-dark-500 transition-transform"></i>
+                                            <i data-lucide="folder" class="w-4 h-4 text-emerald-500"></i>
+                                            <span>gems_feed/</span>
+                                        </div>
+                                        <div id="folder-feat-gems" class="hidden pl-6 border-l border-dark-800 space-y-1 my-1">
+                                            <div class="flex items-center gap-2 py-0.5"><i data-lucide="folder" class="w-4 h-4 text-amber-500"></i> <span>data/</span></div>
+                                            <div class="flex items-center gap-2 py-0.5"><i data-lucide="folder" class="w-4 h-4 text-amber-500"></i> <span>domain/</span></div>
+                                            <div class="flex items-center gap-2 py-0.5"><i data-lucide="folder" class="w-4 h-4 text-amber-500"></i> <span>presentation/</span></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- ar feature -->
+                                    <div class="flex items-center gap-2 py-0.5"><i data-lucide="folder" class="w-4 h-4 text-emerald-500"></i> <span>ar_navigation/</span></div>
+                                    <div class="flex items-center gap-2 py-0.5"><i data-lucide="folder" class="w-4 h-4 text-emerald-500"></i> <span>map_explorer/</span></div>
+                                </div>
+                            </div>
+                            
+                            <div class="pl-4 flex items-center gap-2 py-0.5"><i data-lucide="file-code" class="w-4 h-4 text-cyan-400"></i> <span class="text-white">main.dart</span> <span class="text-xs text-dark-500">(Khởi chạy app)</span></div>
+                            <div class="pl-4 flex items-center gap-2 py-0.5"><i data-lucide="file-code" class="w-4 h-4 text-cyan-400"></i> <span class="text-white">routes.dart</span> <span class="text-xs text-dark-500">(Định tuyến go_router)</span></div>
+                        </div>
+                    </div>
+
+                    <!-- GO TREE -->
+                    <div id="tree-go" class="hidden p-6 rounded-2xl border border-dark-800 bg-dark-900/40 font-mono text-sm text-dark-300 overflow-x-auto">
+                        <div class="mb-4 text-xs font-semibold text-brand-400 flex items-center gap-1.5 uppercase tracking-wider">
+                            <i data-lucide="info" class="w-3.5 h-3.5"></i> Cấu trúc Hexagonal / Clean Architecture tối ưu hóa
+                        </div>
+                        <div class="space-y-1 select-none">
+                            <!-- cmd folder -->
+                            <div class="flex items-center gap-2 py-0.5"><i data-lucide="folder" class="w-4 h-4 text-yellow-500"></i> <span class="text-white">cmd/</span></div>
+                            <div class="pl-4 flex items-center gap-2 py-0.5"><i data-lucide="folder" class="w-4 h-4 text-yellow-500"></i> <span class="text-white">server/</span></div>
+                            <div class="pl-8 flex items-center gap-2 py-0.5"><i data-lucide="file-code" class="w-4 h-4 text-blue-400"></i> <span class="text-white">main.go</span> <span class="text-xs text-dark-500">(Khởi tạo & Chạy máy chủ)</span></div>
+
+                            <!-- internal folder -->
+                            <div class="flex items-center gap-2 cursor-pointer py-0.5 hover:text-white" onclick="toggleFolder('folder-go-internal')">
+                                <i data-lucide="chevron-down" id="arrow-go-internal" class="w-3.5 h-3.5 text-dark-500 transition-transform"></i>
+                                <i data-lucide="folder" class="w-4 h-4 text-yellow-500"></i>
+                                <span>internal/</span>
+                                <span class="text-xs text-dark-500 italic">// Logic kinh doanh riêng tư của ứng dụng</span>
+                            </div>
+                            <div id="folder-go-internal" class="pl-6 border-l border-dark-800 space-y-1 my-1">
+                                <div class="flex items-center gap-2 py-0.5"><i data-lucide="folder" class="w-4 h-4 text-emerald-500"></i> <span>config/</span> <span class="text-xs text-dark-500">(Viper read configs)</span></div>
+                                <div class="flex items-center gap-2 py-0.5"><i data-lucide="folder" class="w-4 h-4 text-emerald-500"></i> <span>domain/</span> <span class="text-xs text-dark-500">(Lớp cốt lõi: struct entities & interfaces)</span></div>
+                                <div class="flex items-center gap-2 py-0.5"><i data-lucide="folder" class="w-4 h-4 text-emerald-500"></i> <span>repo/</span> <span class="text-xs text-dark-500">(Adapter DB: postgres, redis)</span></div>
+                                <div class="flex items-center gap-2 py-0.5"><i data-lucide="folder" class="w-4 h-4 text-emerald-500"></i> <span>usecase/</span> <span class="text-xs text-dark-500">(Nghiệp vụ ứng dụng)</span></div>
+                                <div class="flex items-center gap-2 py-0.5"><i data-lucide="folder" class="w-4 h-4 text-emerald-500"></i> <span>delivery/</span> <span class="text-xs text-dark-500">(Adapter giao thức: HTTP, gRPC, Workers)</span></div>
+                            </div>
+
+                            <!-- pkg folder -->
+                            <div class="flex items-center gap-2 py-0.5"><i data-lucide="folder" class="w-4 h-4 text-yellow-500"></i> <span class="text-white">pkg/</span> <span class="text-xs text-dark-500">// Các gói dùng chung bên ngoài</span></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- V. POSTGIS SCHEMA -->
+                <section id="postgis-schema" class="space-y-6">
+                    <div class="flex items-center justify-between border-b border-dark-800 pb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-pink-500/10 rounded-lg border border-pink-500/30">
+                                <i data-lucide="database" class="w-5 h-5 text-pink-400"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-white">V. Thiết Kế Cơ Sở Dữ Liệu Địa Lý</h3>
+                        </div>
+                        <button onclick="copyToClipboard('sql-code')" class="text-xs font-semibold text-brand-400 hover:text-brand-300 flex items-center gap-1.5 transition-all">
+                            <i data-lucide="copy" class="w-3.5 h-3.5"></i> Sao Chép SQL
+                        </button>
+                    </div>
+
+                    <div class="relative rounded-2xl overflow-hidden border border-dark-800 bg-dark-950 font-mono text-sm leading-relaxed shadow-lg">
+                        <div class="flex items-center justify-between px-4 py-2 bg-dark-900 border-b border-dark-800 text-xs text-dark-400">
+                            <span>schema.sql</span>
+                            <span class="text-pink-500 font-bold uppercase">PostgreSQL + PostGIS</span>
+                        </div>
+                        <pre class="p-5 overflow-x-auto text-dark-200"><code id="sql-code">-- Kích hoạt tiện ích mở rộng PostGIS cho các tính năng địa lý
+CREATE EXTENSION IF NOT EXISTS postgis;
+
+-- 1. Bảng Người dùng
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    avatar_url TEXT,
+    exp_points INT DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 2. Bảng Quán Ẩn / Góc Sống Ảo (Gems)
+CREATE TABLE gems (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(150) NOT NULL,
+    description TEXT,
+    difficulty_level VARCHAR(20) DEFAULT 'medium', -- easy, medium, hard, extreme
+    
+    -- Trường tọa độ không gian sử dụng PostGIS (Sử dụng SRID 4326 đại diện cho GPS chuẩn thế giới)
+    coordinates GEOMETRY(Point, 4326) NOT NULL,
+    
+    address TEXT,
+    created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+    is_approved BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tạo không gian chỉ mục (Spatial Index) để tối ưu hóa việc truy vấn vị trí
+CREATE INDEX idx_gems_coordinates ON gems USING GIST(coordinates);
+
+-- 3. Bảng Video Review (Định dạng dọc kiểu TikTok)
+CREATE TABLE gem_videos (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    gem_id UUID REFERENCES gems(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    video_url TEXT NOT NULL,           -- Đường dẫn file phát trực tiếp (.m3u8)
+    thumbnail_url TEXT,
+    likes_count INT DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);</code></pre>
+                    </div>
+                </section>
+
+                <!-- VI. ALGORITHMS & OPTIMIZATIONS -->
+                <section id="optimization" class="space-y-6">
+                    <div class="flex items-center justify-between border-b border-dark-800 pb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-cyan-500/10 rounded-lg border border-cyan-500/30">
+                                <i data-lucide="zap" class="w-5 h-5 text-cyan-400"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-white">VI. Thuật Toán & Tối Ưu Hóa Quan Trọng</h3>
+                        </div>
+                    </div>
+
+                    <!-- PostGIS Query Block -->
+                    <div class="space-y-4">
+                        <h4 class="text-lg font-bold text-white flex items-center gap-2">
+                            <i data-lucide="map-pin" class="w-5 h-5 text-brand-400"></i>
+                            1. Truy vấn địa điểm trong bán kính $R$ bằng PostGIS
+                        </h4>
+                        <p class="text-sm text-dark-300 leading-relaxed">
+                            Để tìm kiếm tất cả các "Gems" ẩn nằm trong phạm vi bán kính $R$ (mét) xung quanh vị trí GPS của người dùng, máy chủ Go sẽ tận dụng hàm <code class="text-brand-400 font-mono text-xs">ST_DWithin</code> của PostGIS. Phương pháp này tận dụng trực tiếp chỉ mục không gian <code class="text-brand-400 font-mono text-xs">GIST</code> để tìm kiếm nhanh chóng và bỏ qua các điểm vượt quá bán kính tính toán.
+                        </p>
+
+                        <div class="relative rounded-2xl overflow-hidden border border-dark-800 bg-dark-950 font-mono text-sm leading-relaxed shadow-lg">
+                            <div class="flex items-center justify-between px-4 py-2 bg-dark-900 border-b border-dark-800 text-xs text-dark-400">
+                                <span>query_geo.go</span>
+                                <span class="text-blue-400 font-bold">Go Code</span>
+                            </div>
+                            <pre class="p-5 overflow-x-auto text-dark-200"><code id="go-code">// $1: Kinh độ (Longitude), $2: Vĩ độ (Latitude), $3: Bán kính tìm kiếm (Radius tính bằng mét)
+query := `
+    SELECT id, name, difficulty_level, ST_X(coordinates) as longitude, ST_Y(coordinates) as latitude,
+           ST_Distance(coordinates, ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography) as distance_meters
+    FROM gems
+    WHERE ST_DWithin(coordinates::geography, ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography, $3)
+      AND is_approved = TRUE
+    ORDER BY distance_meters ASC
+    LIMIT 20;
+`</code></pre>
+                        </div>
+                    </div>
+
+                    <!-- Video Optimizations -->
+                    <div class="pt-6 space-y-4">
+                        <h4 class="text-lg font-bold text-white flex items-center gap-2">
+                            <i data-lucide="video" class="w-5 h-5 text-brand-400"></i>
+                            2. Nguyên lý tối ưu hóa phát Video luồng của Flutter
+                        </h4>
+                        <p class="text-sm text-dark-300 leading-relaxed">
+                            Bí mật nằm sau khả năng cuộn video mượt mà không bị treo/lag ứng dụng do tràn bộ nhớ đồ họa là việc quản lý nghiêm ngặt vòng đời của các tài nguyên phát luồng.
+                        </p>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+                            <div class="p-5 rounded-xl border border-dark-800 bg-dark-900/20 space-y-2">
+                                <div class="p-2 w-fit bg-red-500/10 rounded-lg text-red-400"><i data-lucide="disc" class="w-5 h-5"></i></div>
+                                <h5 class="font-bold text-white text-sm">Chỉ Dựng Trước 1 Video</h5>
+                                <p class="text-xs text-dark-400 leading-relaxed">Sử dụng cơ chế PreloadPageView để chỉ dựng sẵn tối đa 1 trang kề cận, tránh tải hàng loạt gây tốn băng thông và treo luồng chính.</p>
+                            </div>
+                            <div class="p-5 rounded-xl border border-dark-800 bg-dark-900/20 space-y-2">
+                                <div class="p-2 w-fit bg-amber-500/10 rounded-lg text-amber-400"><i data-lucide="refresh-cw" class="w-5 h-5"></i></div>
+                                <h5 class="font-bold text-white text-sm">Giải Phóng Ngay Lập Tức</h5>
+                                <p class="text-xs text-dark-400 leading-relaxed">Khi phần tử video vượt ra ngoài ranh giới vùng hiển thị (Viewport), kích hoạt hàm giải phóng bộ nhớ đồ họa bằng lệnh hủy controller ngay lập tức.</p>
+                            </div>
+                            <div class="p-5 rounded-xl border border-dark-800 bg-dark-900/20 space-y-2">
+                                <div class="p-2 w-fit bg-brand-500/10 rounded-lg text-brand-400"><i data-lucide="hard-drive" class="w-5 h-5"></i></div>
+                                <h5 class="font-bold text-white text-sm">Phát luồng HLS & Cache</h5>
+                                <p class="text-xs text-dark-400 leading-relaxed">Sử dụng định dạng tệp phát luồng .m3u8, chia nhỏ các gói .ts và tải đệm cache cục bộ cho thiết bị để lần xem lại không cần mạng.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </main>
+        </div>
+
+        <!-- Footer -->
+        <footer class="glass border-t border-dark-800 py-6 px-12 text-center text-sm text-dark-500 flex flex-col md:flex-row items-center justify-between gap-4">
+            <p>© 2026 Hidden Gems Finder Project. Tài liệu kỹ thuật chuẩn doanh nghiệp.</p>
+            <div class="flex gap-6">
+                <a href="#" class="hover:text-brand-400 transition-colors">Tài liệu API</a>
+                <a href="#" class="hover:text-brand-400 transition-colors">Bảo mật</a>
+                <a href="#" class="hover:text-brand-400 transition-colors">Liên hệ hỗ trợ</a>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Page Interaction Script -->
+    <script>
+        // Init Lucide icons
+        lucide.createIcons();
+
+        // Switch Directory Tree Tabs
+        function switchTree(type) {
+            const btnFlutter = document.getElementById('btn-flutter');
+            const btnGo = document.getElementById('btn-go');
+            const treeFlutter = document.getElementById('tree-flutter');
+            const treeGo = document.getElementById('tree-go');
+
+            if (type === 'flutter') {
+                btnFlutter.className = "flex-1 py-2 text-sm font-semibold rounded-lg bg-brand-500 text-dark-950 transition-all";
+                btnGo.className = "flex-1 py-2 text-sm font-semibold rounded-lg text-dark-400 hover:text-white transition-all";
+                treeFlutter.classList.remove('hidden');
+                treeGo.classList.add('hidden');
+            } else {
+                btnGo.className = "flex-1 py-2 text-sm font-semibold rounded-lg bg-brand-500 text-dark-950 transition-all";
+                btnFlutter.className = "flex-1 py-2 text-sm font-semibold rounded-lg text-dark-400 hover:text-white transition-all";
+                treeGo.classList.remove('hidden');
+                treeFlutter.classList.add('hidden');
+            }
+        }
+
+        // Collapse/Expand Folders
+        function toggleFolder(folderId) {
+            const folder = document.getElementById(folderId);
+            const arrow = document.getElementById('arrow-' + folderId.replace('folder-', ''));
+            
+            if (folder.classList.contains('hidden')) {
+                folder.classList.remove('hidden');
+                if (arrow) arrow.style.transform = 'rotate(90deg)';
+            } else {
+                folder.classList.add('hidden');
+                if (arrow) arrow.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        // Copy Code blocks
+        function copyToClipboard(elementId) {
+            const codeText = document.getElementById(elementId).innerText;
+            const tempInput = document.createElement('textarea');
+            tempInput.value = codeText;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            
+            try {
+                // Using document.execCommand('copy') as requested by guidelines
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showToast("Đã sao chép mã thành công!");
+                } else {
+                    showToast("Không thể sao chép mã.");
+                }
+            } catch (err) {
+                showToast("Lỗi khi sao chép.");
+            }
+            document.body.removeChild(tempInput);
+        }
+
+        // Show Custom Toast
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            toastMsg.innerText = message;
+            
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
