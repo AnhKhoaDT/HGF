@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
+import 'features/home/presentation/pages/welcome_page.dart';
+import 'features/home/presentation/pages/home_page.dart';
+import 'features/auth/presentation/pages/login_page.dart';
+import 'features/auth/presentation/pages/signup_page.dart';
+import 'core/theme/app_colors.dart';
+import 'core/routes/slide_route.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -13,79 +19,37 @@ class MyApp extends StatelessWidget {
       title: 'Hidden Gems Finder',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF16b075),
-          brightness: Brightness.light,
+        brightness: Brightness.light,
+        scaffoldBackgroundColor: AppColors.darkBackground,
+        fontFamily: 'Plus Jakarta Sans',
+        colorScheme: ColorScheme.light(
+          primary: AppColors.brandPrimary,
+          secondary: AppColors.brandLight,
+          surface: AppColors.darkSurface,
+          error: AppColors.error,
+          background: AppColors.darkBackground,
         ),
-        useMaterial3: true,
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF16b075),
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-      ),
-      themeMode: ThemeMode.system,
-      home: const HomePage(),
-    );
-  }
-}
-
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Hidden Gems Finder'),
-        centerTitle: true,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.diamond,
-              size: 80,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Hidden Gems Finder',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Săn tìm góc sống ảo & quán ẩn',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.grey,
-                  ),
-            ),
-            const SizedBox(height: 48),
-            ElevatedButton.icon(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Tính năng đang được phát triển...'),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.explore),
-              label: const Text('Khám phá ngay'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 32,
-                  vertical: 16,
-                ),
-              ),
-            ),
-          ],
+        pageTransitionsTheme: const PageTransitionsTheme(
+          builders: {
+            TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+            TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          },
         ),
       ),
+      onGenerateRoute: (settings) {
+        switch (settings.name) {
+          case '/':
+            return MaterialPageRoute(builder: (_) => const WelcomePage());
+          case '/home':
+            return SlideRightRoute(page: const HomePage());
+          case '/login':
+            return SlideRightRoute(page: const LoginPage());
+          case '/signup':
+            return SlideRightRoute(page: const SignUpPage());
+          default:
+            return MaterialPageRoute(builder: (_) => const WelcomePage());
+        }
+      },
     );
   }
 }
