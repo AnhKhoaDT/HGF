@@ -1,228 +1,194 @@
 # 🔧 Hidden Gems Finder - Backend API
 
-Backend API cho ứng dụng Hidden Gems Finder, xây dựng bằng Go với Gin framework.
+Backend API cho ứng dụng Hidden Gems Finder với **Clean Architecture**.
 
-## 🚀 Quick Start
+## ✅ Authentication System Implemented
 
-### Yêu cầu
-- Go 1.22 trở lên
-- PostgreSQL 14+ với PostGIS extension
-- Redis 6+ (optional, cho caching)
+- Firebase Authentication Integration
+- JWT Token Management (Access + Refresh)
+- User Registration & Login
+- Token Refresh & Revocation
+- User Profile Management
+- Gamification System (EXP, Levels, Titles)
+- PostgreSQL + PostGIS Database
 
-### Cài đặt & Chạy
+## 🚀 Cách Chạy
 
-1. **Clone và di chuyển vào thư mục:**
+### Bước 1: Cài đặt Dependencies
+
 ```bash
-cd BE-HGF
+# Di chuyển vào thư mục backend
+cd be-hgf
+
+# Install Go dependencies
+go mod download
 ```
 
-2. **Cài đặt dependencies:**
+### Bước 2: Setup Database
+
+**Option A: Sử dụng Docker (Recommended)**
 ```bash
-go mod tidy
+# Start PostgreSQL with PostGIS
+docker-compose up -d postgres
+
+# Kiểm tra database đã chạy
+docker ps
 ```
 
-3. **Tạo file `.env`:**
+**Option B: PostgreSQL Local**
 ```bash
+# Tạo database
+createdb hidden_gems_db
+
+# Enable PostGIS extension
+psql -d hidden_gems_db -c "CREATE EXTENSION IF NOT EXISTS postgis;"
+
+# Chạy migrations
+psql -U postgres -d hidden_gems_db -f migrations/001_init_schema.sql
+```
+
+### Bước 3: Cấu hình Environment
+
+```bash
+# Copy file example
 cp .env.example .env
+
+# Sửa file .env với thông tin của bạn
+# Ít nhất cần config:
+# - DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME
+# - JWT_SECRET (đổi thành chuỗi ngẫu nhiên)
 ```
 
-4. **Chỉnh sửa `.env` với thông tin của bạn:**
+**.env tối thiểu:**
 ```env
-PORT=8080
-DATABASE_URL=postgresql://user:password@localhost:5432/hidden_gems_db?sslmode=disable
-REDIS_URL=redis://localhost:6379
-JWT_SECRET=your-secret-key-here
+SERVER_PORT=8080
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_NAME=hidden_gems_db
+JWT_SECRET=your-secret-change-this-in-production
 ```
 
-5. **Chạy server:**
+### Bước 4: Chạy Server
+
 ```bash
-go run main.go
-```
+# Chạy development
+go run cmd/server/main.go
 
-Server sẽ chạy tại `http://localhost:8080`
-
-## 📡 API Endpoints
-
-### Health Check
-```http
-GET /health
-```
-
-**Response:**
-```json
-{
-  "status": "ok",
-  "message": "Hidden Gems Finder API is running"
-}
-```
-
-### API v1
-
-#### Ping
-```http
-GET /api/v1/ping
-```
-
-**Response:**
-```json
-{
-  "message": "pong"
-}
-```
-
-## 🛠️ Tech Stack
-
-- **Language:** Go 1.22+
-- **Framework:** Gin (Web framework)
-- **Database:** PostgreSQL + PostGIS
-- **ORM:** GORM
-- **Cache:** Redis
-- **Auth:** JWT + Firebase Auth
-- **API:** REST + gRPC
-
-## 📁 Cấu trúc dự án (Đề xuất)
-
-```
-BE-HGF/
-├── cmd/
-│   └── server/
-│       └── main.go          # Entry point
-├── internal/
-│   ├── config/              # Configuration
-│   ├── models/              # Database models
-│   ├── handlers/            # HTTP handlers
-│   ├── services/            # Business logic
-│   ├── repositories/        # Data access layer
-│   └── middleware/          # Middleware (auth, cors, etc.)
-├── pkg/
-│   └── utils/               # Shared utilities
-├── migrations/              # Database migrations
-├── .env.example             # Environment template
-├── .gitignore
-├── go.mod
-├── go.sum
-├── main.go                  # Current entry point
-└── README.md
-```
-
-## 🗄️ Database Schema (PostGIS)
-
-### Tables (Kế hoạch)
-
-**users**
-- id (uuid, primary key)
-- email (string, unique)
-- username (string, unique)
-- firebase_uid (string, unique)
-- level (int) - Gamification level
-- exp_points (int)
-- created_at, updated_at
-
-**gems** (Địa điểm)
-- id (uuid, primary key)
-- name (string)
-- description (text)
-- location (geography(Point, 4326)) - PostGIS
-- address (string)
-- category (string)
-- difficulty_level (int)
-- created_by (uuid, foreign key -> users)
-- created_at, updated_at
-
-**videos**
-- id (uuid, primary key)
-- gem_id (uuid, foreign key -> gems)
-- user_id (uuid, foreign key -> users)
-- video_url (string)
-- thumbnail_url (string)
-- duration (int)
-- views_count (int)
-- likes_count (int)
-- created_at, updated_at
-
-## 🎯 Roadmap
-
-### ✅ Phase 1: Foundation (Đã hoàn thành)
-- [x] Setup Go project với Gin
-- [x] Basic health check endpoint
-- [x] Environment configuration
-
-### 🚧 Phase 2: Core APIs (Đang phát triển)
-- [ ] Database setup (PostgreSQL + PostGIS)
-- [ ] User authentication (Firebase + JWT)
-- [ ] User CRUD APIs
-- [ ] Gems CRUD APIs
-- [ ] Geospatial queries
-
-### 📋 Phase 3: Advanced Features
-- [ ] Video upload & streaming
-- [ ] Redis caching layer
-- [ ] gRPC services
-- [ ] Real-time features (WebSocket)
-- [ ] Search & filtering
-- [ ] Recommendation system
-
-## 🔧 Development
-
-### Run with hot reload
-```bash
-# Install air for hot reload
-go install github.com/cosmtrek/air@latest
-
-# Run with air
-air
-```
-
-### Run tests
-```bash
-go test ./...
-```
-
-### Build
-```bash
-go build -o bin/server main.go
-```
-
-### Run production
-```bash
+# Hoặc build và chạy
+go build -o bin/server cmd/server/main.go
 ./bin/server
 ```
 
-## 🐳 Docker (Kế hoạch)
+Server chạy tại: **http://localhost:8080**
+
+### Bước 5: Test API
 
 ```bash
-# Build image
-docker build -t hidden-gems-api .
+# Health check
+curl http://localhost:8080/health
 
-# Run container
-docker run -p 8080:8080 --env-file .env hidden-gems-api
+# Ping
+curl http://localhost:8080/api/v1/ping
 ```
 
-## 📝 Environment Variables
+**Expected response:**
+```json
+{
+  "status": "ok",
+  "message": "Hidden Gems Finder API is running",
+  "version": "1.0.0"
+}
+```
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| PORT | Server port | 8080 |
-| DATABASE_URL | PostgreSQL connection string | - |
-| REDIS_URL | Redis connection string | - |
-| JWT_SECRET | JWT signing secret | - |
-| FIREBASE_PROJECT_ID | Firebase project ID | - |
+## 📡 API Endpoints
 
-## 🔒 Security
+### Public
+- `POST /api/v1/auth/register` - Register new user
+- `POST /api/v1/auth/login` - Login
+- `POST /api/v1/auth/refresh` - Refresh access token
+- `POST /api/v1/auth/logout` - Logout
 
-- JWT authentication
-- Firebase Auth integration
-- CORS middleware
-- Rate limiting (kế hoạch)
-- Input validation
-- SQL injection prevention (GORM)
+### Protected (requires Authorization header)
+- `GET /api/v1/auth/me` - Get user profile
+- `PUT /api/v1/auth/profile` - Update profile
+- `POST /api/v1/auth/logout-all` - Logout all devices
 
-## 📞 Support
+## 🛠️ Tech Stack
 
-Nếu gặp vấn đề, vui lòng tạo issue hoặc liên hệ team phát triển.
+- **Go 1.22+** với Gin framework
+- **PostgreSQL 14+** với PostGIS
+- **GORM** ORM
+- **Firebase Auth + JWT**
+- **Clean Architecture**
+
+## 📁 Project Structure
+
+```
+be-hgf/
+├── cmd/server/              # Entry point
+├── internal/
+│   ├── config/              # Configuration
+│   ├── domain/
+│   │   ├── entities/        # Domain entities
+│   │   └── repositories/    # Repository interfaces
+│   ├── repo/                # Repository implementations
+│   ├── usecase/             # Business logic
+│   └── delivery/http/
+│       ├── handlers/        # HTTP handlers
+│       ├── middleware/      # Middleware
+│       └── router/          # Router
+├── pkg/
+│   ├── database/            # Database connection
+│   ├── firebase/            # Firebase client
+│   └── jwt/                 # JWT manager
+└── migrations/              # SQL migrations
+```
+
+## 🎮 Gamification System
+
+| Level | EXP | Title |
+|-------|-----|-------|
+| 1-4 | 0-399 | Nhà Thám Hiểm |
+| 5-9 | 500-899 | Thám Hiểm Viên |
+| 10-19 | 1000-1899 | Nhà Thám Hiểm Kỳ Cựu |
+| 20-29 | 2000-2899 | Chuyên Gia Khám Phá |
+| 30-39 | 3000-3899 | Thợ Săn Quán Ẩn |
+| 40-49 | 4000-4899 | Bậc Thầy Săn Gem |
+| 50+ | 5000+ | Huyền Thoại Thám Hiểm |
+
+**Formula:** Level = (ExpPoints / 100) + 1
+
+## 🐳 Docker
+
+```bash
+# Start services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+```
+
+## 🎯 Roadmap
+
+### ✅ Phase 1: Auth (Completed)
+- [x] Firebase Auth integration
+- [x] JWT token management
+- [x] User CRUD
+- [x] Gamification system
+
+### 📋 Phase 2: Core Features (Next)
+- [ ] Gems CRUD APIs
+- [ ] Geospatial queries
+- [ ] Video upload
+- [ ] AR navigation endpoints
 
 ---
 
 **Version:** 1.0.0  
-**Go:** 1.22+  
-**Framework:** Gin
+**Status:** ✅ Auth System Ready
+
