@@ -48,7 +48,6 @@ func AuthMiddleware(jwtManager *jwt.JWTManager) gin.HandlerFunc {
 		c.Set("user_id", claims.UserID)
 		c.Set("email", claims.Email)
 		c.Set("username", claims.Username)
-		c.Set("firebase_uid", claims.FirebaseUID)
 
 		c.Next()
 	}

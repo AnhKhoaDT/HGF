@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 	"hidden-gems-finder/internal/domain/entities"
 	"hidden-gems-finder/internal/domain/repositories"
-	"hidden-gems-finder/pkg/firebase"
 	"hidden-gems-finder/pkg/jwt"
 )
 
@@ -16,7 +16,6 @@ import (
 type AuthUseCase struct {
 	userRepo         repositories.UserRepository
 	refreshTokenRepo repositories.RefreshTokenRepository
-	firebaseAuth     *firebase.AuthClient
 	jwtManager       *jwt.JWTManager
 }
 
@@ -24,26 +23,26 @@ type AuthUseCase struct {
 func NewAuthUseCase(
 	userRepo repositories.UserRepository,
 	refreshTokenRepo repositories.RefreshTokenRepository,
-	firebaseAuth *firebase.AuthClient,
 	jwtManager *jwt.JWTManager,
 ) *AuthUseCase {
 	return &AuthUseCase{
 		userRepo:         userRepo,
 		refreshTokenRepo: refreshTokenRepo,
-		firebaseAuth:     firebaseAuth,
 		jwtManager:       jwtManager,
 	}
 }
 
 // LoginRequest represents login request data
 type LoginRequest struct {
-	FirebaseIDToken string `json:"firebase_id_token" binding:"required"`
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required,min=6"`
 }
 
 // RegisterRequest represents registration request data
 type RegisterRequest struct {
-	FirebaseIDToken string `json:"firebase_id_token" binding:"required"`
-	Username        string `json:"username" binding:"required,min=3,max=50"`
+	Username string `json:"username" binding:"required,min=3,max=50"`
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required,min=6"`
 }
 
 // AuthResponse represents authentication response
@@ -68,18 +67,18 @@ type UserResponse struct {
 	CreatedAt   time.Time  `json:"created_at"`
 }
 
-// Login authenticates user with Firebase ID token
+// Login authenticates user with email and password
 func (uc *AuthUseCase) Login(ctx context.Context, req *LoginRequest) (*AuthResponse, error) {
-	// 1. Verify Firebase ID Token
-	token, err := uc.firebaseAuth.VerifyIDToken(ctx, req.FirebaseIDToken)
+	// 1. Get user from database by email
+	user, err := uc.userRepo.GetByEmail(ctx, req.Email)
 	if err != nil {
-		return nil, errors.New("invalid firebase token")
+		return nil, errors.New("invalid email or password")
 	}
 
-	// 2. Get user from database by Firebase UID
-	user, err := uc.userRepo.GetByFirebaseUID(ctx, token.UID)
+	// 2. Compare password hash
+	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password))
 	if err != nil {
-		return nil, errors.New("user not found, please register first")
+		return nil, errors.New("invalid email or password")
 	}
 
 	// 3. Update last login time
@@ -88,7 +87,7 @@ func (uc *AuthUseCase) Login(ctx context.Context, req *LoginRequest) (*AuthRespo
 	}
 
 	// 4. Generate JWT tokens
-	accessToken, err := uc.jwtManager.GenerateAccessToken(user.ID, user.Email, user.Username, user.FirebaseUID)
+	accessToken, err := uc.jwtManager.GenerateAccessToken(user.ID, user.Email, user.Username)
 	if err != nil {
 		return nil, errors.New("failed to generate access token")
 	}
@@ -120,22 +119,16 @@ func (uc *AuthUseCase) Login(ctx context.Context, req *LoginRequest) (*AuthRespo
 
 // Register creates a new user account
 func (uc *AuthUseCase) Register(ctx context.Context, req *RegisterRequest) (*AuthResponse, error) {
-	// 1. Verify Firebase ID Token
-	token, err := uc.firebaseAuth.VerifyIDToken(ctx, req.FirebaseIDToken)
-	if err != nil {
-		return nil, errors.New("invalid firebase token")
-	}
-
-	// 2. Check if user already exists
-	exists, err := uc.userRepo.ExistsByFirebaseUID(ctx, token.UID)
+	// 1. Check if user already exists by email
+	exists, err := uc.userRepo.ExistsByEmail(ctx, req.Email)
 	if err != nil {
 		return nil, errors.New("failed to check user existence")
 	}
 	if exists {
-		return nil, errors.New("user already registered")
+		return nil, errors.New("email already registered")
 	}
 
-	// 3. Check if username is taken
+	// 2. Check if username is taken
 	exists, err = uc.userRepo.ExistsByUsername(ctx, req.Username)
 	if err != nil {
 		return nil, errors.New("failed to check username availability")
@@ -144,32 +137,31 @@ func (uc *AuthUseCase) Register(ctx context.Context, req *RegisterRequest) (*Aut
 		return nil, errors.New("username already taken")
 	}
 
-	// 4. Get Firebase user data
-	firebaseUser, err := uc.firebaseAuth.GetUser(ctx, token.UID)
+	// 3. Hash password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return nil, errors.New("failed to get firebase user data")
+		return nil, errors.New("failed to hash password")
 	}
 
-	// 5. Create new user
+	// 4. Create new user
 	now := time.Now()
 	user := &entities.User{
-		Username:    req.Username,
-		Email:       firebaseUser.Email,
-		FirebaseUID: token.UID,
-		AvatarURL:   &firebaseUser.PhotoURL,
-		ExpPoints:   0,
-		Level:       1,
-		LevelTitle:  "Nhà Thám Hiểm",
-		IsActive:    true,
-		LastLoginAt: &now,
+		Username:     req.Username,
+		Email:        req.Email,
+		PasswordHash: string(hashedPassword),
+		ExpPoints:    0,
+		Level:        1,
+		LevelTitle:   "Nhà Thám Hiểm",
+		IsActive:     true,
+		LastLoginAt:  &now,
 	}
 
 	if err := uc.userRepo.Create(ctx, user); err != nil {
 		return nil, errors.New("failed to create user")
 	}
 
-	// 6. Generate JWT tokens
-	accessToken, err := uc.jwtManager.GenerateAccessToken(user.ID, user.Email, user.Username, user.FirebaseUID)
+	// 5. Generate JWT tokens
+	accessToken, err := uc.jwtManager.GenerateAccessToken(user.ID, user.Email, user.Username)
 	if err != nil {
 		return nil, errors.New("failed to generate access token")
 	}
@@ -179,7 +171,7 @@ func (uc *AuthUseCase) Register(ctx context.Context, req *RegisterRequest) (*Aut
 		return nil, errors.New("failed to generate refresh token")
 	}
 
-	// 7. Store refresh token in database
+	// 6. Store refresh token in database
 	refreshToken := &entities.RefreshToken{
 		UserID:    user.ID,
 		Token:     refreshTokenStr,
@@ -224,7 +216,7 @@ func (uc *AuthUseCase) RefreshToken(ctx context.Context, refreshTokenStr string)
 	}
 
 	// 4. Generate new access token
-	accessToken, err := uc.jwtManager.GenerateAccessToken(user.ID, user.Email, user.Username, user.FirebaseUID)
+	accessToken, err := uc.jwtManager.GenerateAccessToken(user.ID, user.Email, user.Username)
 	if err != nil {
 		return nil, errors.New("failed to generate access token")
 	}

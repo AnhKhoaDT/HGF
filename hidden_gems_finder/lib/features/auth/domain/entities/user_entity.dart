@@ -9,7 +9,7 @@ class UserEntity extends Equatable {
   final String? phoneNumber;
   final int expPoints;
   final String userLevel;
-  final DateTime createdAt;
+  final DateTime? createdAt;
   final DateTime? lastLoginAt;
   final bool isEmailVerified;
   final bool isPhoneVerified;

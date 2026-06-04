@@ -7,7 +7,6 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"hidden-gems-finder/internal/domain/entities"
 )
 
 func NewPostgresDB(dsn string, isDebug bool) (*gorm.DB, error) {
@@ -37,22 +36,13 @@ func NewPostgresDB(dsn string, isDebug bool) (*gorm.DB, error) {
 }
 
 func AutoMigrate(db *gorm.DB) error {
-	log.Println("🔄 Running database migrations...")
+	log.Println("🔄 Checking database extensions...")
 	
 	// Enable PostGIS
 	if err := db.Exec("CREATE EXTENSION IF NOT EXISTS postgis").Error; err != nil {
 		return fmt.Errorf("failed to enable PostGIS: %w", err)
 	}
 
-	err := db.AutoMigrate(
-		&entities.User{},
-		&entities.RefreshToken{},
-	)
-	
-	if err != nil {
-		return fmt.Errorf("migration failed: %w", err)
-	}
-
-	log.Println("✅ Migrations completed")
+	log.Println("✅ Database verification completed")
 	return nil
 }

@@ -5,9 +5,12 @@ import '../../../../core/localization/app_localizations_vi.dart';
 import '../../../../core/utils/validators.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/custom_button.dart';
+import '../viewmodels/auth_view_model.dart';
 
 class SignUpPage extends StatefulWidget {
-  const SignUpPage({Key? key}) : super(key: key);
+  final AuthViewModel viewModel;
+
+  const SignUpPage({Key? key, required this.viewModel}) : super(key: key);
 
   @override
   State<SignUpPage> createState() => _SignUpPageState();
@@ -21,7 +24,6 @@ class _SignUpPageState extends State<SignUpPage> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   
-  bool _isLoading = false;
   bool _acceptedTerms = false;
 
   @override
@@ -46,19 +48,34 @@ class _SignUpPageState extends State<SignUpPage> {
     }
 
     if (_formKey.currentState!.validate()) {
-      setState(() => _isLoading = true);
-
-      await Future.delayed(const Duration(seconds: 2));
-      
-      setState(() => _isLoading = false);
+     await widget.viewModel.register(
+      username: _usernameController.text.trim(),
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+    );
 
       if (mounted) {
+        if(widget.viewModel.status == AuthStatus.success){
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(AppLocalizationsVi.signUpSuccess),
             backgroundColor: AppColors.success,
           ),
         );
+
+        Navigator.of(context).pushNamedAndRemoveUntil(
+            '/home',
+            (route) => false,
+          );
+        
+        }else{
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(widget.viewModel.errorMessage!),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
       }
     }
   }
@@ -96,7 +113,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         CustomButton(
                           text: AppLocalizationsVi.createAccount,
                           onPressed: _handleSignUp,
-                          isLoading: _isLoading,
+                          isLoading: false,
                           variant: ButtonVariant.primary,
                         ),
                         const SizedBox(height: 24),
@@ -111,6 +128,23 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
                 ),
               ],
+            ),
+            // Full-screen loading overlay
+            ListenableBuilder(
+              listenable: widget.viewModel,
+              builder: (context, _) {
+                if (!widget.viewModel.isLoading) return const SizedBox.shrink();
+                return Positioned.fill(
+                  child: Container(
+                    color: Colors.black.withOpacity(0.6),
+                    child: const Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.brandPrimary,
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
           ],
         ),

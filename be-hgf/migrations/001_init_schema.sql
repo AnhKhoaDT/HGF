@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     username VARCHAR(50) UNIQUE NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
-    firebase_uid VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
     avatar_url TEXT,
     exp_points INT DEFAULT 0,
     level INT DEFAULT 1,
@@ -19,7 +19,6 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- Create indexes for users table
 CREATE INDEX idx_users_email ON users(email);
-CREATE INDEX idx_users_firebase_uid ON users(firebase_uid);
 CREATE INDEX idx_users_username ON users(username);
 CREATE INDEX idx_users_is_active ON users(is_active);
 

@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../auth/presentation/viewmodels/auth_view_model.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);
+  final AuthViewModel viewModel;
+  const HomePage({Key? key, required this.viewModel}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final user = viewModel.user;
     return Scaffold(
       backgroundColor: AppColors.darkBackground,
       appBar: AppBar(
@@ -27,11 +30,16 @@ class HomePage extends StatelessWidget {
             ),
           ),
           IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              Icons.account_circle_outlined,
-              color: AppColors.textPrimary,
-            ),
+            onPressed: () => Navigator.pushNamed(context, '/profile'),
+            icon: user?.avatarUrl != null && user!.avatarUrl!.isNotEmpty
+                ? CircleAvatar(
+                    radius: 12,
+                    backgroundImage: NetworkImage(user.avatarUrl!),
+                  )
+                : const Icon(
+                    Icons.account_circle_outlined,
+                    color: AppColors.textPrimary,
+                  ),
           ),
         ],
       ),

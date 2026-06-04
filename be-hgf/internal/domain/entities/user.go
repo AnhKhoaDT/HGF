@@ -7,18 +7,18 @@ import (
 )
 
 type User struct {
-	ID          uuid.UUID  `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
-	Username    string     `json:"username" gorm:"type:varchar(50);uniqueIndex;not null"`
-	Email       string     `json:"email" gorm:"type:varchar(100);uniqueIndex;not null"`
-	FirebaseUID string     `json:"firebase_uid" gorm:"type:varchar(255);uniqueIndex;not null"`
-	AvatarURL   *string    `json:"avatar_url" gorm:"type:text"`
-	ExpPoints   int        `json:"exp_points" gorm:"default:0"`
-	Level       int        `json:"level" gorm:"default:1"`
-	LevelTitle  string     `json:"level_title" gorm:"type:varchar(100);default:'Nhà Thám Hiểm'"`
-	IsActive    bool       `json:"is_active" gorm:"default:true"`
-	LastLoginAt *time.Time `json:"last_login_at"`
-	CreatedAt   time.Time  `json:"created_at" gorm:"autoCreateTime"`
-	UpdatedAt   time.Time  `json:"updated_at" gorm:"autoUpdateTime"`
+	ID           uuid.UUID  `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
+	Username     string     `json:"username" gorm:"type:varchar(50);not null"`
+	Email        string     `json:"email" gorm:"type:varchar(100);not null"`
+	PasswordHash string     `json:"-" gorm:"type:varchar(255);not null"`
+	AvatarURL    *string    `json:"avatar_url" gorm:"type:text"`
+	ExpPoints    int        `json:"exp_points" gorm:"default:0"`
+	Level        int        `json:"level" gorm:"default:1"`
+	LevelTitle   string     `json:"level_title" gorm:"type:varchar(100);default:'Nhà Thám Hiểm'"`
+	IsActive     bool       `json:"is_active" gorm:"default:true"`
+	LastLoginAt  *time.Time `json:"last_login_at"`
+	CreatedAt    time.Time  `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt    time.Time  `json:"updated_at" gorm:"autoUpdateTime"`
 }
 
 func (User) TableName() string {

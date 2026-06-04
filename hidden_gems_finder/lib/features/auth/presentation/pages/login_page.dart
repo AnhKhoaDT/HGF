@@ -4,9 +4,11 @@ import '../../../../core/localization/app_localizations_vi.dart';
 import '../../../../core/utils/validators.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/custom_button.dart';
+import '../viewmodels/auth_view_model.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+  final AuthViewModel viewModel;
+  const LoginPage({Key? key, required this.viewModel}) : super(key: key);
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -16,7 +18,6 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -27,34 +28,39 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _handleLogin() async {
     if (_formKey.currentState!.validate()) {
-      setState(() => _isLoading = true);
-
-      await Future.delayed(const Duration(seconds: 2));
-      
-      setState(() => _isLoading = false);
+      await widget.viewModel.login(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(AppLocalizationsVi.loginSuccess),
-            backgroundColor: AppColors.success,
-          ),
-        );
+        if (widget.viewModel.status == AuthStatus.success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(AppLocalizationsVi.loginSuccess),
+              backgroundColor: AppColors.success,
+            ),
+          );
+
+          Navigator.of(context).pushNamedAndRemoveUntil(
+            '/home',
+            (route) => false,
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(widget.viewModel.errorMessage ?? 'Đăng nhập thất bại'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
       }
     }
   }
 
-  Future<void> _handleGoogleLogin() async {
-    setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 1));
-    setState(() => _isLoading = false);
-  }
+  Future<void> _handleGoogleLogin() async {}
 
-  Future<void> _handleAppleLogin() async {
-    setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 1));
-    setState(() => _isLoading = false);
-  }
+  Future<void> _handleAppleLogin() async {}
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +95,7 @@ class _LoginPageState extends State<LoginPage> {
                         CustomButton(
                           text: AppLocalizationsVi.login,
                           onPressed: _handleLogin,
-                          isLoading: _isLoading,
+                          isLoading: false,
                           variant: ButtonVariant.primary,
                         ),
                         const SizedBox(height: 24),
@@ -104,6 +110,22 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ],
+            ),
+            ListenableBuilder(
+              listenable: widget.viewModel,
+              builder: (context, _) {
+                if (!widget.viewModel.isLoading) return const SizedBox.shrink();
+                return Positioned.fill(
+                  child: Container(
+                    color: Colors.black.withOpacity(0.6),
+                    child: const Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.brandPrimary,
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
           ],
         ),
@@ -255,7 +277,7 @@ class _LoginPageState extends State<LoginPage> {
             variant: ButtonVariant.social,
             height: 56,
             onPressed: _handleGoogleLogin,
-            isLoading: _isLoading,
+            isLoading: false,
             icon: Container(
               width: 24,
               height: 24,
@@ -283,7 +305,7 @@ class _LoginPageState extends State<LoginPage> {
             variant: ButtonVariant.social,
             height: 56,
             onPressed: _handleAppleLogin,
-            isLoading: _isLoading,
+            isLoading: false,
             icon: const Icon(
               Icons.apple_rounded,
               size: 24,

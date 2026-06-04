@@ -13,7 +13,6 @@ type Config struct {
 	Database DatabaseConfig
 	Redis    RedisConfig
 	JWT      JWTConfig
-	Firebase FirebaseConfig
 }
 
 // ServerConfig holds server configuration
@@ -48,28 +47,15 @@ type JWTConfig struct {
 	RefreshTokenDuration time.Duration
 }
 
-// FirebaseConfig holds Firebase configuration
-type FirebaseConfig struct {
-	CredentialsPath string
-	ProjectID       string
-}
 
-// LoadConfig loads configuration from environment variables and config files
+// LoadConfig loads configuration from the .env file
 func LoadConfig() (*Config, error) {
-	viper.SetConfigName("config")
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath(".")
-	viper.AddConfigPath("./config")
-	viper.AddConfigPath("/etc/hidden-gems-finder/")
+	viper.SetConfigFile(".env")
+	viper.SetConfigType("env")
 
-	// Set defaults
-	setDefaults()
-
-	// Read from config file (optional)
+	// Read from config file
 	if err := viper.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
-			return nil, err
-		}
+		return nil, fmt.Errorf("error reading .env file: %w (please create a .env file from .env.example)", err)
 	}
 
 	// Override with environment variables
@@ -100,10 +86,17 @@ func LoadConfig() (*Config, error) {
 			AccessTokenDuration:  viper.GetDuration("JWT_ACCESS_TOKEN_DURATION"),
 			RefreshTokenDuration: viper.GetDuration("JWT_REFRESH_TOKEN_DURATION"),
 		},
-		Firebase: FirebaseConfig{
-			CredentialsPath: viper.GetString("FIREBASE_CREDENTIALS_PATH"),
-			ProjectID:       viper.GetString("FIREBASE_PROJECT_ID"),
-		},
+	}
+
+	// Validate critical parameters (fail fast)
+	if config.Server.Port == "" {
+		return nil, fmt.Errorf("SERVER_PORT is not set in .env")
+	}
+	if config.Database.Host == "" {
+		return nil, fmt.Errorf("DB_HOST is not set in .env")
+	}
+	if config.JWT.SecretKey == "" {
+		return nil, fmt.Errorf("JWT_SECRET is not set in .env")
 	}
 
 	return config, nil
@@ -128,34 +121,4 @@ func (c *Config) GetRedisDSN() string {
 		return fmt.Sprintf("redis://:%s@%s:%d/%d", c.Redis.Password, c.Redis.Host, c.Redis.Port, c.Redis.DB)
 	}
 	return fmt.Sprintf("redis://%s:%d/%d", c.Redis.Host, c.Redis.Port, c.Redis.DB)
-}
-
-func setDefaults() {
-	// Server defaults
-	viper.SetDefault("SERVER_PORT", "8080")
-	viper.SetDefault("SERVER_MODE", "debug")
-	viper.SetDefault("ALLOW_ORIGINS", []string{"*"})
-
-	// Database defaults
-	viper.SetDefault("DB_HOST", "localhost")
-	viper.SetDefault("DB_PORT", 5432)
-	viper.SetDefault("DB_USER", "postgres")
-	viper.SetDefault("DB_PASSWORD", "postgres")
-	viper.SetDefault("DB_NAME", "hidden_gems_db")
-	viper.SetDefault("DB_SSLMODE", "disable")
-
-	// Redis defaults
-	viper.SetDefault("REDIS_HOST", "localhost")
-	viper.SetDefault("REDIS_PORT", 6379)
-	viper.SetDefault("REDIS_PASSWORD", "")
-	viper.SetDefault("REDIS_DB", 0)
-
-	// JWT defaults
-	viper.SetDefault("JWT_SECRET", "your-secret-key-change-in-production")
-	viper.SetDefault("JWT_ACCESS_TOKEN_DURATION", 15*time.Minute)
-	viper.SetDefault("JWT_REFRESH_TOKEN_DURATION", 7*24*time.Hour) // 7 days
-
-	// Firebase defaults
-	viper.SetDefault("FIREBASE_CREDENTIALS_PATH", "")
-	viper.SetDefault("FIREBASE_PROJECT_ID", "")
 }

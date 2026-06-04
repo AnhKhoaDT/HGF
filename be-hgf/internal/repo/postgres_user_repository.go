@@ -48,17 +48,6 @@ func (r *postgresUserRepository) GetByEmail(ctx context.Context, email string) (
 	return &user, nil
 }
 
-func (r *postgresUserRepository) GetByFirebaseUID(ctx context.Context, firebaseUID string) (*entities.User, error) {
-	var user entities.User
-	err := r.db.WithContext(ctx).Where("firebase_uid = ? AND is_active = ?", firebaseUID, true).First(&user).Error
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, errors.New("user not found")
-		}
-		return nil, err
-	}
-	return &user, nil
-}
 
 func (r *postgresUserRepository) GetByUsername(ctx context.Context, username string) (*entities.User, error) {
 	var user entities.User
@@ -105,10 +94,3 @@ func (r *postgresUserRepository) ExistsByUsername(ctx context.Context, username 
 	return count > 0, err
 }
 
-func (r *postgresUserRepository) ExistsByFirebaseUID(ctx context.Context, firebaseUID string) (bool, error) {
-	var count int64
-	err := r.db.WithContext(ctx).Model(&entities.User{}).
-		Where("firebase_uid = ? AND is_active = ?", firebaseUID, true).
-		Count(&count).Error
-	return count > 0, err
-}

@@ -13,7 +13,6 @@ type Claims struct {
 	UserID      uuid.UUID `json:"user_id"`
 	Email       string    `json:"email"`
 	Username    string    `json:"username"`
-	FirebaseUID string    `json:"firebase_uid"`
 	jwt.RegisteredClaims
 }
 
@@ -34,12 +33,11 @@ func NewJWTManager(secretKey string, accessTokenDuration, refreshTokenDuration t
 }
 
 // GenerateAccessToken generates a new access token
-func (m *JWTManager) GenerateAccessToken(userID uuid.UUID, email, username, firebaseUID string) (string, error) {
+func (m *JWTManager) GenerateAccessToken(userID uuid.UUID, email, username string) (string, error) {
 	claims := Claims{
 		UserID:      userID,
 		Email:       email,
 		Username:    username,
-		FirebaseUID: firebaseUID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(m.accessTokenDuration)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

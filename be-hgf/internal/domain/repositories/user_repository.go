@@ -18,9 +18,6 @@ type UserRepository interface {
 	// GetByEmail retrieves a user by email
 	GetByEmail(ctx context.Context, email string) (*entities.User, error)
 	
-	// GetByFirebaseUID retrieves a user by Firebase UID
-	GetByFirebaseUID(ctx context.Context, firebaseUID string) (*entities.User, error)
-	
 	// GetByUsername retrieves a user by username
 	GetByUsername(ctx context.Context, username string) (*entities.User, error)
 	
@@ -38,7 +35,4 @@ type UserRepository interface {
 	
 	// ExistsByUsername checks if a user with the given username exists
 	ExistsByUsername(ctx context.Context, username string) (bool, error)
-	
-	// ExistsByFirebaseUID checks if a user with the given Firebase UID exists
-	ExistsByFirebaseUID(ctx context.Context, firebaseUID string) (bool, error)
 }

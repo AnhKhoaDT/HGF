@@ -8,11 +8,10 @@ abstract class AuthRepository {
     required String password,
   });
 
-  Future<Either<Failure, UserEntity>> signUpWithEmailPassword({
+  Future<UserEntity> register({
+    required String username,
     required String email,
     required String password,
-    String? username,
-    String? fullName,
   });
 
   Future<Either<Failure, UserEntity>> loginWithGoogle();

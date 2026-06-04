@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/localization/app_localizations_vi.dart';
 import '../../../auth/presentation/widgets/custom_button.dart';
+import '../../../auth/presentation/viewmodels/auth_view_model.dart';
 
 class WelcomePage extends StatefulWidget {
-  const WelcomePage({Key? key}) : super(key: key);
+  final AuthViewModel viewModel;
+  const WelcomePage({Key? key, required this.viewModel}) : super(key: key);
 
   @override
   State<WelcomePage> createState() => _WelcomePageState();
@@ -20,6 +22,7 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
   @override
   void initState() {
     super.initState();
+    _checkAuth();
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
@@ -51,6 +54,18 @@ class _WelcomePageState extends State<WelcomePage> with SingleTickerProviderStat
   void dispose() {
     _animationController.dispose();
     super.dispose();
+  }
+
+  Future<void> _checkAuth() async {
+    final isLoggedIn = await widget.viewModel.checkLoginStatus();
+    if (mounted) {
+      setState(() {
+        _isLoggedIn = isLoggedIn;
+      });
+      if (isLoggedIn) {
+        Navigator.pushReplacementNamed(context, '/home');
+      }
+    }
   }
 
   void _handleGetStarted() {
