@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Roadmap · Ứng dụng Lập kế hoạch Du lịch (TripWise)</title>
+<style>
+  :root {
+    --bg: #0e1726;
+    --bg-soft: #16213a;
+    --card: #1c2942;
+    --card-hover: #233354;
+    --line: #2c3c5c;
+    --text: #e7ecf5;
+    --muted: #97a6c4;
+    --brand: #3ddc97;
+    --brand-2: #4f8cff;
+    --accent: #ffb454;
+    --danger: #ff6b6b;
+    --radius: 14px;
+    --shadow: 0 10px 30px rgba(0,0,0,.35);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: radial-gradient(1200px 600px at 80% -10%, #1c2c4c 0%, var(--bg) 55%);
+    color: var(--text);
+    line-height: 1.6;
+    padding-bottom: 80px;
+  }
+  a { color: var(--brand-2); }
+  .container { max-width: 1180px; margin: 0 auto; padding: 0 22px; }
+
+  /* HEADER */
+  header.hero {
+    padding: 64px 0 40px;
+    border-bottom: 1px solid var(--line);
+    background: linear-gradient(180deg, rgba(61,220,151,.06), transparent);
+  }
+  .badge {
+    display: inline-block; font-size: 13px; letter-spacing: .5px;
+    color: var(--brand); border: 1px solid var(--brand);
+    padding: 4px 12px; border-radius: 999px; margin-bottom: 18px;
+    text-transform: uppercase; font-weight: 600;
+  }
+  h1 { font-size: 42px; line-height: 1.15; margin-bottom: 14px; }
+  h1 .grad { background: linear-gradient(90deg, var(--brand), var(--brand-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .lead { color: var(--muted); font-size: 18px; max-width: 760px; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 26px; }
+  .meta-pill { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; min-width: 150px; }
+  .meta-pill .k { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+  .meta-pill .v { font-size: 18px; font-weight: 700; color: var(--text); }
+
+  /* NAV */
+  nav.tabs { position: sticky; top: 0; z-index: 50; background: rgba(14,23,38,.9); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  nav.tabs .container { display: flex; gap: 6px; overflow-x: auto; padding-top: 10px; padding-bottom: 10px; }
+  nav.tabs button {
+    background: transparent; color: var(--muted); border: 1px solid transparent;
+    padding: 9px 16px; border-radius: 10px; cursor: pointer; font-size: 14px; white-space: nowrap; font-weight: 600;
+    transition: .15s;
+  }
+  nav.tabs button:hover { color: var(--text); background: var(--card); }
+  nav.tabs button.active { color: var(--bg); background: var(--brand); border-color: var(--brand); }
+
+  /* SECTIONS */
+  section { padding: 48px 0; border-bottom: 1px solid var(--line); display: none; }
+  section.active { display: block; animation: fade .25s ease; }
+  @keyframes fade { from { opacity: 0; transform: translateY(8px);} to { opacity: 1; transform: none; } }
+  h2 { font-size: 28px; margin-bottom: 8px; }
+  h2 .num { color: var(--brand); margin-right: 8px; }
+  .section-sub { color: var(--muted); margin-bottom: 28px; max-width: 760px; }
+  h3 { font-size: 20px; margin: 30px 0 14px; color: var(--text); }
+
+  /* CARDS GRID */
+  .grid { display: grid; gap: 16px; }
+  .grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 860px) { .grid.cols-2, .grid.cols-3 { grid-template-columns: 1fr; } h1 { font-size: 32px; } }
+
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 20px; transition: .18s; position: relative; overflow: hidden;
+  }
+  .card:hover { background: var(--card-hover); transform: translateY(-3px); box-shadow: var(--shadow); }
+  .card .ico { font-size: 26px; margin-bottom: 10px; }
+  .card h4 { font-size: 17px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .card p { color: var(--muted); font-size: 14px; }
+  .card ul { color: var(--muted); font-size: 14px; margin: 10px 0 0 18px; }
+  .card ul li { margin-bottom: 4px; }
+  .tag { font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 999px; }
+  .tag.must { background: rgba(61,220,151,.15); color: var(--brand); }
+  .tag.should { background: rgba(79,140,255,.15); color: var(--brand-2); }
+  .tag.nice { background: rgba(255,180,84,.15); color: var(--accent); }
+
+  /* PRIORITY LEGEND */
+  .legend { display: flex; gap: 18px; flex-wrap: wrap; margin-bottom: 22px; font-size: 13px; color: var(--muted); }
+  .legend span b { color: var(--text); }
+
+  /* TABLE */
+  table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 14px; }
+  th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+  th { color: var(--brand); font-size: 12px; text-transform: uppercase; letter-spacing: .5px; }
+  tr:hover td { background: var(--bg-soft); }
+
+  /* TIMELINE */
+  .phase { background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--brand); border-radius: var(--radius); padding: 20px 22px; margin-bottom: 16px; }
+  .phase .head { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .phase .ph-name { font-size: 18px; font-weight: 700; }
+  .phase .ph-time { font-size: 13px; color: var(--accent); font-weight: 700; background: rgba(255,180,84,.12); padding: 4px 12px; border-radius: 999px; }
+  .phase .goal { color: var(--muted); font-size: 14px; margin: 8px 0 12px; }
+  .phase ul { margin-left: 18px; color: var(--text); font-size: 14px; }
+  .phase ul li { margin-bottom: 5px; }
+  .phase ul li span { color: var(--muted); }
+
+  /* GANTT */
+  .gantt { margin-top: 26px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; overflow-x: auto; }
+  .gantt-row { display: grid; grid-template-columns: 190px 1fr; align-items: center; gap: 12px; margin-bottom: 10px; min-width: 640px; }
+  .gantt-row .lbl { font-size: 13px; color: var(--text); font-weight: 600; }
+  .bar-track { position: relative; height: 26px; background: var(--bg-soft); border-radius: 8px; }
+  .bar { position: absolute; top: 0; height: 26px; border-radius: 8px; display: flex; align-items: center; padding: 0 10px; font-size: 11px; font-weight: 700; color: var(--bg); white-space: nowrap; }
+  .months { display: grid; grid-template-columns: 190px 1fr; gap: 12px; margin-bottom: 8px; min-width: 640px; }
+  .months .scale { display: grid; grid-template-columns: repeat(12, 1fr); font-size: 11px; color: var(--muted); }
+  .months .scale span { border-left: 1px solid var(--line); padding-left: 4px; }
+
+  /* STACK PILLS */
+  .stack-group { margin-bottom: 18px; }
+  .stack-group .label { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+  .pills { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pill { background: var(--bg-soft); border: 1px solid var(--line); border-radius: 8px; padding: 7px 13px; font-size: 13px; }
+  .pill b { color: var(--brand); }
+
+  .callout { background: rgba(79,140,255,.08); border: 1px solid rgba(79,140,255,.3); border-radius: var(--radius); padding: 16px 18px; margin-top: 18px; font-size: 14px; color: var(--text); }
+  .callout.warn { background: rgba(255,107,107,.08); border-color: rgba(255,107,107,.3); }
+  .callout b { color: var(--brand-2); }
+
+  footer { text-align: center; color: var(--muted); font-size: 13px; padding: 36px 0 0; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
+  @media (max-width: 860px){ .kpi-grid { grid-template-columns: repeat(2,1fr);} .gantt-row, .months { grid-template-columns: 130px 1fr; } }
+  .kpi { background: var(--card); border:1px solid var(--line); border-radius: var(--radius); padding: 18px; text-align:center; }
+  .kpi .big { font-size: 26px; font-weight: 800; color: var(--brand); }
+  .kpi .small { font-size: 12px; color: var(--muted); }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="container">
+    <span class="badge">Roadmap sản phẩm · v1.0</span>
+    <h1><span class="grad">TripWise</span> — Ứng dụng lập kế hoạch du lịch thông minh</h1>
+    <p class="lead">Người dùng chọn điểm đến, tỉnh/thành và sở thích (biển, núi, ẩm thực…); hệ thống tự sinh nhiều lịch trình tối ưu, kèm bộ sưu tập, đánh giá địa điểm và mạng xã hội du lịch. Khởi đầu tại Việt Nam, mở rộng toàn cầu.</p>
+    <div class="meta-row">
+      <div class="meta-pill"><div class="k">Thị trường</div><div class="v">🇻🇳 → 🌍</div></div>
+      <div class="meta-pill"><div class="k">Nền tảng</div><div class="v">Web + Mobile</div></div>
+      <div class="meta-pill"><div class="k">Tổng thời gian</div><div class="v">~11–13 tháng</div></div>
+      <div class="meta-pill"><div class="k">Tới MVP</div><div class="v">~3 tháng</div></div>
+      <div class="meta-pill"><div class="k">Đội ngũ tối thiểu</div><div class="v">6–8 người</div></div>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <div class="container" id="tabBar">
+    <button class="active" data-t="overview">Tổng quan</button>
+    <button data-t="core">Chức năng chính</button>
+    <button data-t="secondary">Chức năng phụ</button>
+    <button data-t="data">Dữ liệu & Crawl</button>
+    <button data-t="tech">Kiến trúc & Công nghệ</button>
+    <button data-t="timeline">Lộ trình & Thời gian</button>
+    <button data-t="team">Đội ngũ & Chi phí</button>
+    <button data-t="metrics">KPI & Rủi ro</button>
+  </div>
+</nav>
+
+<!-- ===================== OVERVIEW ===================== -->
+<section id="overview" class="active">
+  <div class="container">
+    <h2><span class="num">00</span>Tổng quan sản phẩm</h2>
+    <p class="section-sub">TripWise là nền tảng kết hợp <b>AI sinh lịch trình</b> + <b>cơ sở dữ liệu địa điểm</b> + <b>mạng xã hội du lịch</b>. Mục tiêu: biến việc lên kế hoạch đi chơi từ vài giờ tìm kiếm thủ công xuống còn vài phút.</p>
+
+    <div class="grid cols-3">
+      <div class="card"><div class="ico">🧭</div><h4>Bài toán</h4><p>Lập kế hoạch du lịch tốn thời gian, thông tin rải rác trên Google/TikTok/blog, khó tối ưu lộ trình theo ngân sách và sở thích.</p></div>
+      <div class="card"><div class="ico">💡</div><h4>Giải pháp</h4><p>Chọn vài tiêu chí → nhận nhiều lịch trình hoàn chỉnh, có bản đồ, chi phí, thời gian; lưu lại, chỉnh sửa, chia sẻ.</p></div>
+      <div class="card"><div class="ico">🎯</div><h4>Người dùng mục tiêu</h4><p>Khách du lịch tự túc 18–40 tuổi, nhóm bạn, cặp đôi, gia đình; người sáng tạo nội dung du lịch.</p></div>
+    </div>
+
+    <h3>Trụ cột giá trị của hệ thống</h3>
+    <div class="grid cols-2">
+      <div class="card"><h4>① Trình tạo lịch trình AI</h4><p>Đầu vào: điểm đến, tỉnh/thành, sở thích, số ngày, ngân sách, kiểu nhóm. Đầu ra: nhiều phương án lịch trình tối ưu theo khoảng cách & thời gian.</p></div>
+      <div class="card"><h4>② Bộ sưu tập & Lưu trữ</h4><p>Người dùng gom địa điểm/lịch trình theo thành phố thành các bộ sưu tập public/private, tái sử dụng và chia sẻ.</p></div>
+      <div class="card"><h4>③ Mạng xã hội du lịch</h4><p>Theo dõi, thích, bình luận, chia sẻ lịch trình; bảng tin khám phá; xếp hạng địa điểm cộng đồng.</p></div>
+      <div class="card"><h4>④ Dữ liệu phong phú & đa ngôn ngữ</h4><p>Thu thập dữ liệu từ Google/TikTok/OSM, chuẩn hóa; giao diện đa ngôn ngữ (VI/EN trước).</p></div>
+    </div>
+
+    <div class="callout">💬 <b>Gợi ý chiến lược:</b> Làm chắc <b>luồng lõi “chọn tiêu chí → sinh lịch trình → lưu”</b> ở MVP trước, rồi mới mở rộng mạng xã hội và crawl dữ liệu quy mô lớn. Tránh ôm tất cả ngay từ đầu.</div>
+  </div>
+</section>
+
+<!-- ===================== CORE ===================== -->
+<section id="core">
+  <div class="container">
+    <h2><span class="num">01</span>Chức năng chính (theo yêu cầu)</h2>
+    <p class="section-sub">Đây là các chức năng cốt lõi bạn mô tả, được hệ thống hóa và bổ sung chi tiết để dùng thực tế.</p>
+    <div class="legend">
+      <span><span class="tag must">MUST</span> &nbsp;<b>Bắt buộc cho MVP</b></span>
+      <span><span class="tag should">SHOULD</span> &nbsp;<b>Quan trọng, giai đoạn 2</b></span>
+      <span><span class="tag nice">NICE</span> &nbsp;<b>Tăng giá trị, giai đoạn sau</b></span>
+    </div>
+
+    <div class="grid cols-2">
+      <div class="card">
+        <h4>🔐 Tài khoản & Hồ sơ <span class="tag must">MUST</span></h4>
+        <ul>
+          <li>Đăng ký/đăng nhập email + OAuth (Google, Facebook, Apple)</li>
+          <li>Hồ sơ: avatar, sở thích du lịch, ngôn ngữ, quốc gia</li>
+          <li>Phân quyền: user / content moderator / admin</li>
+          <li>Quên mật khẩu, xác thực email, bảo mật 2 lớp (sau)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>🤖 Tạo lịch trình thông minh <span class="tag must">MUST</span></h4>
+        <ul>
+          <li>Đầu vào: tỉnh/thành, điểm đến, sở thích (biển/núi/ẩm thực/văn hóa/phiêu lưu…)</li>
+          <li>Tham số: số ngày, ngân sách, số người, kiểu nhóm, nhịp độ</li>
+          <li>Sinh <b>nhiều</b> phương án lịch trình theo ngày/giờ</li>
+          <li>Tối ưu lộ trình theo khoảng cách & thời gian di chuyển</li>
+          <li>Chỉnh sửa thủ công (kéo-thả, thêm/xóa điểm)</li>
+          <li>Ước tính chi phí & thời gian cho mỗi phương án</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>📍 CSDL địa điểm (POI) <span class="tag must">MUST</span></h4>
+        <ul>
+          <li>Chi tiết: ảnh, mô tả, giờ mở cửa, giá vé, vị trí, danh mục</li>
+          <li>Phân loại theo sở thích (biển, núi, ẩm thực…)</li>
+          <li>Tích hợp bản đồ & chỉ đường</li>
+          <li>Điểm đánh giá tổng hợp từ cộng đồng</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>⭐ Đánh giá & Yêu thích <span class="tag must">MUST</span></h4>
+        <ul>
+          <li>Đánh giá địa điểm: sao + nhận xét + ảnh</li>
+          <li>Danh sách địa điểm yêu thích (wishlist)</li>
+          <li>Hữu ích/báo cáo đánh giá; chống spam</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>🗂️ Bộ sưu tập theo thành phố <span class="tag should">SHOULD</span></h4>
+        <ul>
+          <li>Tạo bộ sưu tập địa điểm/lịch trình theo tỉnh/thành</li>
+          <li>Chế độ public / private</li>
+          <li>Chia sẻ link, sao chép bộ sưu tập của người khác</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>👥 Tương tác xã hội <span class="tag should">SHOULD</span></h4>
+        <ul>
+          <li>Theo dõi người dùng, bảng tin khám phá</li>
+          <li>Thích, bình luận, chia sẻ lịch trình & bộ sưu tập</li>
+          <li>Lập kế hoạch nhóm (cùng chỉnh sửa 1 lịch trình)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>🌐 Đa ngôn ngữ (i18n) <span class="tag should">SHOULD</span></h4>
+        <ul>
+          <li>Giao diện đa ngôn ngữ (VI/EN trước, mở rộng sau)</li>
+          <li>Dữ liệu nội dung đa ngôn ngữ / dịch tự động</li>
+          <li>Định dạng tiền tệ, đơn vị, ngày giờ theo vùng</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>🕸️ Thu thập dữ liệu (Crawl) <span class="tag should">SHOULD</span></h4>
+        <ul>
+          <li>Nguồn: Google Places, TikTok, Maps/OSM, blog du lịch</li>
+          <li>Pipeline: thu thập → làm sạch → khử trùng lặp → gắn thẻ</li>
+          <li>Kiểm duyệt nội dung trước khi hiển thị</li>
+        </ul>
+        <p style="margin-top:10px"><i>(Chi tiết ở tab “Dữ liệu & Crawl”)</i></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== SECONDARY ===================== -->
+<section id="secondary">
+  <div class="container">
+    <h2><span class="num">02</span>Chức năng phụ (để thành sản phẩm thực tế)</h2>
+    <p class="section-sub">Những tính năng tăng độ hoàn thiện, giữ chân người dùng và mở đường kiếm tiền.</p>
+
+    <h3>Trải nghiệm & Tiện ích</h3>
+    <div class="grid cols-3">
+      <div class="card"><div class="ico">🔍</div><h4>Tìm kiếm & Lọc nâng cao</h4><p>Theo địa điểm, sở thích, khoảng giá, đánh giá, khoảng cách.</p></div>
+      <div class="card"><div class="ico">🔔</div><h4>Thông báo</h4><p>Push/email/in-app: tương tác, gợi ý chuyến đi, nhắc lịch trình.</p></div>
+      <div class="card"><div class="ico">🗺️</div><h4>Bản đồ & Chỉ đường</h4><p>Xem lịch trình trên bản đồ, ước tính thời gian di chuyển.</p></div>
+      <div class="card"><div class="ico">☁️</div><h4>Thời tiết</h4><p>Dự báo theo ngày của lịch trình, cảnh báo mưa bão.</p></div>
+      <div class="card"><div class="ico">📴</div><h4>Chế độ offline</h4><p>Tải lịch trình về dùng khi không có mạng.</p></div>
+      <div class="card"><div class="ico">📄</div><h4>Xuất PDF / Chia sẻ</h4><p>Xuất lịch trình đẹp, in được, gửi cho bạn bè.</p></div>
+      <div class="card"><div class="ico">💰</div><h4>Quản lý ngân sách</h4><p>Theo dõi chi tiêu, chia tiền nhóm, đổi tiền tệ.</p></div>
+      <div class="card"><div class="ico">📔</div><h4>Nhật ký hành trình</h4><p>Ghi lại ảnh/cảm nhận sau chuyến đi, tạo album.</p></div>
+      <div class="card"><div class="ico">🤝</div><h4>Lập kế hoạch nhóm real-time</h4><p>Nhiều người cùng vote & chỉnh sửa lịch trình.</p></div>
+    </div>
+
+    <h3>Tăng trưởng & Kiếm tiền</h3>
+    <div class="grid cols-3">
+      <div class="card"><div class="ico">🏨</div><h4>Đặt phòng/vé (affiliate)</h4><p>Tích hợp Booking, Agoda, Klook… ăn hoa hồng.</p></div>
+      <div class="card"><div class="ico">🎟️</div><h4>Tour & hướng dẫn viên</h4><p>Sàn kết nối tour địa phương, guide bản địa.</p></div>
+      <div class="card"><div class="ico">🏅</div><h4>Gamification</h4><p>Huy hiệu, điểm, cấp độ khi đóng góp đánh giá/địa điểm.</p></div>
+      <div class="card"><div class="ico">🎁</div><h4>Giới thiệu (referral)</h4><p>Mời bạn nhận thưởng, tăng lan truyền.</p></div>
+      <div class="card"><div class="ico">⭐</div><h4>Gói Premium</h4><p>Bỏ quảng cáo, AI nâng cao, lịch trình không giới hạn.</p></div>
+      <div class="card"><div class="ico">📢</div><h4>Quảng cáo địa phương</h4><p>Nhà hàng/khách sạn trả phí hiển thị nổi bật.</p></div>
+    </div>
+
+    <h3>Vận hành & Quản trị</h3>
+    <div class="grid cols-3">
+      <div class="card"><div class="ico">🛡️</div><h4>Kiểm duyệt nội dung</h4><p>Hàng đợi duyệt review/ảnh/địa điểm, lọc tự động + thủ công.</p></div>
+      <div class="card"><div class="ico">📊</div><h4>Admin Dashboard</h4><p>Thống kê người dùng, nội dung, doanh thu, sức khỏe hệ thống.</p></div>
+      <div class="card"><div class="ico">🤖</div><h4>Chatbot trợ lý</h4><p>Hỏi đáp về điểm đến, điều chỉnh lịch trình bằng hội thoại.</p></div>
+      <div class="card"><div class="ico">🆘</div><h4>Thông tin khẩn cấp</h4><p>Bệnh viện, đại sứ quán, số điện thoại khẩn theo vùng.</p></div>
+      <div class="card"><div class="ico">♿</div><h4>Khả năng tiếp cận (a11y)</h4><p>Hỗ trợ đọc màn hình, tương phản, điều hướng bàn phím.</p></div>
+      <div class="card"><div class="ico">🔎</div><h4>SEO (bản web)</h4><p>Trang địa điểm/lịch trình public tối ưu tìm kiếm để hút traffic.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== DATA ===================== -->
+<section id="data">
+  <div class="container">
+    <h2><span class="num">03</span>Dữ liệu & Thu thập (Crawl)</h2>
+    <p class="section-sub">Dữ liệu là “xương sống”. Chất lượng lịch trình AI phụ thuộc trực tiếp vào chất lượng dữ liệu địa điểm.</p>
+
+    <h3>Nguồn dữ liệu</h3>
+    <div class="grid cols-2">
+      <div class="card"><h4>API chính thức (ưu tiên)</h4><ul>
+        <li>Google Places / Maps API — địa điểm, giờ, đánh giá</li>
+        <li>OpenStreetMap / Overpass — bản đồ, tọa độ miễn phí</li>
+        <li>Foursquare, TripAdvisor (nếu có), dữ liệu mở du lịch</li>
+      </ul></div>
+      <div class="card"><h4>Crawl/Social (bổ sung)</h4><ul>
+        <li>TikTok / YouTube / Instagram — địa điểm “hot”, trend</li>
+        <li>Blog & báo du lịch — mô tả, gợi ý lịch trình</li>
+        <li>Đóng góp từ người dùng (UGC) — review, ảnh, địa điểm mới</li>
+      </ul></div>
+    </div>
+
+    <h3>Pipeline xử lý dữ liệu</h3>
+    <div class="card">
+      <p style="font-size:15px;color:var(--text)">
+        <b>1. Thu thập</b> (scheduler + crawler/API) →
+        <b>2. Làm sạch & chuẩn hóa</b> (định dạng địa chỉ, tọa độ, danh mục) →
+        <b>3. Khử trùng lặp</b> (so khớp tên + vị trí) →
+        <b>4. Làm giàu</b> (gắn thẻ sở thích biển/núi/ẩm thực, dịch đa ngôn ngữ) →
+        <b>5. Kiểm duyệt</b> (tự động + thủ công) →
+        <b>6. Lập chỉ mục</b> (search engine + vector cho gợi ý) →
+        <b>7. Phục vụ</b> (API cho app).
+      </p>
+    </div>
+
+    <div class="callout warn">⚠️ <b>Lưu ý pháp lý & kỹ thuật quan trọng:</b> Crawl TikTok/Google có ràng buộc điều khoản dịch vụ và bản quyền. Hãy <b>ưu tiên API chính thức</b>, tôn trọng <code>robots.txt</code>/ToS, lưu nguồn và chỉ hiển thị nội dung được phép. Với ảnh/video, cân nhắc chỉ nhúng link gốc thay vì sao chép. Nên tham vấn pháp lý trước khi crawl quy mô lớn để tránh rủi ro vi phạm và chặn IP.</div>
+
+    <h3>Vai trò của AI</h3>
+    <div class="grid cols-3">
+      <div class="card"><div class="ico">🧠</div><h4>Sinh lịch trình</h4><p>Kết hợp ràng buộc (thời gian, khoảng cách, sở thích) + LLM/thuật toán tối ưu tuyến.</p></div>
+      <div class="card"><div class="ico">🔗</div><h4>Gợi ý cá nhân hóa</h4><p>Vector embedding địa điểm + lịch sử người dùng để gợi ý phù hợp.</p></div>
+      <div class="card"><div class="ico">🏷️</div><h4>Tự gắn thẻ & tóm tắt</h4><p>Phân loại địa điểm, tóm tắt review, dịch nội dung đa ngôn ngữ.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TECH ===================== -->
+<section id="tech">
+  <div class="container">
+    <h2><span class="num">04</span>Kiến trúc & Gợi ý công nghệ</h2>
+    <p class="section-sub">Bạn tự chọn nền tảng cuối cùng — đây là các lựa chọn phổ biến, đã được kiểm chứng cho loại sản phẩm này. Khởi đầu nên <b>monolith module hóa</b>, tách microservices khi cần mở rộng.</p>
+
+    <div class="stack-group">
+      <div class="label">Frontend Web</div>
+      <div class="pills">
+        <span class="pill"><b>Next.js</b> (React, SEO tốt)</span>
+        <span class="pill">Vue / Nuxt</span>
+        <span class="pill">TypeScript</span>
+        <span class="pill">Tailwind CSS</span>
+        <span class="pill">i18next (đa ngôn ngữ)</span>
+      </div>
+    </div>
+    <div class="stack-group">
+      <div class="label">Mobile</div>
+      <div class="pills">
+        <span class="pill"><b>React Native</b> / Expo</span>
+        <span class="pill">Flutter</span>
+        <span class="pill">(hoặc PWA cho giai đoạn đầu)</span>
+      </div>
+    </div>
+    <div class="stack-group">
+      <div class="label">Backend</div>
+      <div class="pills">
+        <span class="pill"><b>Node.js</b> (NestJS)</span>
+        <span class="pill">Python (FastAPI/Django)</span>
+        <span class="pill">Go</span>
+        <span class="pill">REST + GraphQL</span>
+      </div>
+    </div>
+    <div class="stack-group">
+      <div class="label">Dữ liệu & Lưu trữ</div>
+      <div class="pills">
+        <span class="pill"><b>PostgreSQL</b> + PostGIS (không gian địa lý)</span>
+        <span class="pill">Redis (cache)</span>
+        <span class="pill">Elasticsearch / Meilisearch (tìm kiếm)</span>
+        <span class="pill">Vector DB (pgvector/Pinecone)</span>
+        <span class="pill">S3 (ảnh/file)</span>
+      </div>
+    </div>
+    <div class="stack-group">
+      <div class="label">AI / ML</div>
+      <div class="pills">
+        <span class="pill">OpenAI / Gemini / Claude API</span>
+        <span class="pill">Routing: OSRM / Google Directions</span>
+        <span class="pill">Recommendation engine</span>
+      </div>
+    </div>
+    <div class="stack-group">
+      <div class="label">Hạ tầng & DevOps</div>
+      <div class="pills">
+        <span class="pill">Docker + Kubernetes</span>
+        <span class="pill">AWS / GCP / Azure</span>
+        <span class="pill">CI/CD (GitHub Actions)</span>
+        <span class="pill">CDN (Cloudflare)</span>
+        <span class="pill">Monitoring (Grafana, Sentry)</span>
+      </div>
+    </div>
+    <div class="stack-group">
+      <div class="label">Crawl & Hàng đợi</div>
+      <div class="pills">
+        <span class="pill">Scrapy / Playwright</span>
+        <span class="pill">Kafka / RabbitMQ / BullMQ</span>
+        <span class="pill">Airflow (lập lịch pipeline)</span>
+      </div>
+    </div>
+
+    <div class="callout">🧩 <b>Mô hình kiến trúc tổng thể:</b> Client (Web/Mobile) → API Gateway → các dịch vụ (Auth, Itinerary/AI, POI/Search, Social, Booking) → DB (Postgres/PostGIS + Redis + Search + Vector) ; Data Pipeline chạy riêng nạp dữ liệu vào CSDL địa điểm.</div>
+  </div>
+</section>
+
+<!-- ===================== TIMELINE ===================== -->
+<section id="timeline">
+  <div class="container">
+    <h2><span class="num">05</span>Lộ trình & Ước tính thời gian</h2>
+    <p class="section-sub">Ước tính cho đội <b>6–8 người</b> làm song song web + backend + mobile. Thời gian sẽ giảm nếu đội lớn hơn, tăng nếu nhỏ hơn. Tổng <b>~11–13 tháng</b> tới bản đầy đủ; <b>~3 tháng</b> tới MVP có thể dùng thật.</p>
+
+    <!-- GANTT -->
+    <div class="gantt">
+      <div class="months">
+        <div></div>
+        <div class="scale">
+          <span>T1</span><span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span>
+          <span>T7</span><span>T8</span><span>T9</span><span>T10</span><span>T11</span><span>T12</span>
+        </div>
+      </div>
+      <div class="gantt-row"><div class="lbl">P0 · Khảo sát & Thiết kế</div><div class="bar-track"><div class="bar" style="left:0%;width:8%;background:var(--accent)">P0</div></div></div>
+      <div class="gantt-row"><div class="lbl">P1 · MVP lõi</div><div class="bar-track"><div class="bar" style="left:8%;width:22%;background:var(--brand)">MVP</div></div></div>
+      <div class="gantt-row"><div class="lbl">P2 · Bộ sưu tập & Xã hội</div><div class="bar-track"><div class="bar" style="left:30%;width:18%;background:var(--brand-2)">P2</div></div></div>
+      <div class="gantt-row"><div class="lbl">P3 · AI nâng cao & Crawl</div><div class="bar-track"><div class="bar" style="left:46%;width:22%;background:#b388ff">P3</div></div></div>
+      <div class="gantt-row"><div class="lbl">P4 · Đa ngôn ngữ & Mobile</div><div class="bar-track"><div class="bar" style="left:64%;width:16%;background:#ff8fa3">P4</div></div></div>
+      <div class="gantt-row"><div class="lbl">P5 · Kiếm tiền & Mở rộng</div><div class="bar-track"><div class="bar" style="left:78%;width:22%;background:var(--accent)">P5</div></div></div>
+    </div>
+
+    <!-- PHASES -->
+    <div style="margin-top:28px">
+      <div class="phase">
+        <div class="head"><span class="ph-name">P0 · Khảo sát, UX & Thiết kế hệ thống</span><span class="ph-time">2–4 tuần</span></div>
+        <div class="goal">Chốt phạm vi, nghiên cứu người dùng, thiết kế UI/UX & kiến trúc, dựng nền dự án.</div>
+        <ul>
+          <li>Nghiên cứu thị trường & đối thủ; chốt yêu cầu <span>(PM)</span></li>
+          <li>Wireframe + thiết kế UI, design system <span>(Designer)</span></li>
+          <li>Thiết kế CSDL, kiến trúc, chọn stack <span>(Tech Lead)</span></li>
+          <li>Khởi tạo repo, CI/CD, môi trường dev <span>(DevOps)</span></li>
+        </ul>
+      </div>
+
+      <div class="phase">
+        <div class="head"><span class="ph-name">P1 · MVP lõi — luồng tạo lịch trình</span><span class="ph-time">8–10 tuần</span></div>
+        <div class="goal">Người dùng đăng nhập → chọn tỉnh/thành + sở thích → nhận nhiều lịch trình → lưu & xem chi tiết.</div>
+        <ul>
+          <li>Auth & hồ sơ người dùng (email + Google)</li>
+          <li>CSDL địa điểm khởi tạo (vài tỉnh/thành chủ lực: HN, HCM, Đà Nẵng, Đà Lạt, Nha Trang)</li>
+          <li>Engine sinh lịch trình v1 (luật + AI), nhiều phương án</li>
+          <li>Xem/chỉnh sửa lịch trình, bản đồ cơ bản, ước tính chi phí</li>
+          <li>Đánh giá địa điểm + wishlist; tìm kiếm cơ bản</li>
+          <li>Bản web responsive (PWA)</li>
+        </ul>
+      </div>
+
+      <div class="phase">
+        <div class="head"><span class="ph-name">P2 · Bộ sưu tập & Mạng xã hội</span><span class="ph-time">6–8 tuần</span></div>
+        <div class="goal">Cho phép lưu trữ có tổ chức và tương tác cộng đồng.</div>
+        <ul>
+          <li>Bộ sưu tập theo thành phố, public/private, chia sẻ</li>
+          <li>Theo dõi, bảng tin, like/comment/share lịch trình</li>
+          <li>Trang hồ sơ công khai, sao chép lịch trình người khác</li>
+          <li>Thông báo in-app + email</li>
+        </ul>
+      </div>
+
+      <div class="phase">
+        <div class="head"><span class="ph-name">P3 · AI nâng cao & Pipeline dữ liệu</span><span class="ph-time">8–10 tuần</span></div>
+        <div class="goal">Nâng chất lượng gợi ý và mở rộng dữ liệu địa điểm trên quy mô lớn.</div>
+        <ul>
+          <li>Pipeline crawl/API: Google Places, OSM, TikTok (theo ToS)</li>
+          <li>Làm sạch, khử trùng lặp, gắn thẻ tự động, kiểm duyệt</li>
+          <li>Cá nhân hóa bằng embedding + lịch sử người dùng</li>
+          <li>Chatbot điều chỉnh lịch trình bằng hội thoại</li>
+          <li>Tối ưu tuyến đường nâng cao (routing thực tế)</li>
+        </ul>
+      </div>
+
+      <div class="phase">
+        <div class="head"><span class="ph-name">P4 · Đa ngôn ngữ & App Mobile</span><span class="ph-time">4–6 tuần</span></div>
+        <div class="goal">Sẵn sàng cho mở rộng quốc tế và trải nghiệm di động.</div>
+        <ul>
+          <li>i18n giao diện (VI/EN) + dịch nội dung động</li>
+          <li>App mobile (React Native/Flutter) cho luồng chính</li>
+          <li>Chế độ offline, xuất PDF, đa tiền tệ/đơn vị</li>
+        </ul>
+      </div>
+
+      <div class="phase">
+        <div class="head"><span class="ph-name">P5 · Kiếm tiền, Tăng trưởng & Mở rộng toàn cầu</span><span class="ph-time">liên tục</span></div>
+        <div class="goal">Tạo doanh thu và mở rộng ra các quốc gia mới.</div>
+        <ul>
+          <li>Affiliate đặt phòng/vé/tour; gói Premium; quảng cáo</li>
+          <li>Gamification, referral, tối ưu giữ chân</li>
+          <li>Admin dashboard, analytics, A/B testing</li>
+          <li>Mở rộng dữ liệu sang quốc gia mới</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TEAM ===================== -->
+<section id="team">
+  <div class="container">
+    <h2><span class="num">06</span>Đội ngũ & Phạm vi công sức</h2>
+    <p class="section-sub">Cấu hình đội tối thiểu để giao hàng đều đặn. Có thể thuê freelancer/agency cho phần thiết kế hoặc crawl.</p>
+    <table>
+      <thead><tr><th>Vai trò</th><th>Số lượng</th><th>Trách nhiệm chính</th></tr></thead>
+      <tbody>
+        <tr><td>Product Manager</td><td>1</td><td>Phạm vi, ưu tiên, lộ trình, phối hợp</td></tr>
+        <tr><td>UI/UX Designer</td><td>1</td><td>Wireframe, design system, trải nghiệm</td></tr>
+        <tr><td>Tech Lead / Kiến trúc</td><td>1</td><td>Kiến trúc, code review, kỹ thuật then chốt</td></tr>
+        <tr><td>Backend Engineer</td><td>2</td><td>API, CSDL, engine lịch trình, pipeline</td></tr>
+        <tr><td>Frontend Engineer</td><td>1–2</td><td>Web/PWA, sau đó mobile</td></tr>
+        <tr><td>Data/ML Engineer</td><td>1</td><td>Crawl, AI gợi ý, cá nhân hóa</td></tr>
+        <tr><td>QA (kiểm thử)</td><td>1 (bán thời gian)</td><td>Test, đảm bảo chất lượng</td></tr>
+        <tr><td>DevOps</td><td>1 (bán thời gian)</td><td>Hạ tầng, CI/CD, giám sát</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Lưu ý về chi phí</h3>
+    <div class="callout">💵 Chi phí phụ thuộc lớn vào quốc gia thuê nhân sự và mức lương, nên tôi không đưa con số cụ thể để tránh sai lệch. Các <b>chi phí vận hành định kỳ</b> cần dự trù: hosting/cloud, Google Maps/Places API (tính theo lượt gọi), API LLM (OpenAI/Gemini), lưu trữ ảnh (S3), CDN, email/push, và chi phí pháp lý cho phần dữ liệu. Hãy theo dõi sát chi phí Maps API và LLM vì đây thường là 2 khoản đắt nhất khi quy mô tăng.</div>
+  </div>
+</section>
+
+<!-- ===================== METRICS ===================== -->
+<section id="metrics">
+  <div class="container">
+    <h2><span class="num">07</span>KPI thành công & Rủi ro</h2>
+    <p class="section-sub">Đo lường đúng để biết sản phẩm có tạo giá trị thật hay không.</p>
+
+    <h3>Chỉ số bắc cầu (KPI)</h3>
+    <div class="kpi-grid">
+      <div class="kpi"><div class="big">% </div><div class="small">Tỷ lệ hoàn tất tạo lịch trình</div></div>
+      <div class="kpi"><div class="big">⭐</div><div class="small">Mức hài lòng với lịch trình AI</div></div>
+      <div class="kpi"><div class="big">↩️</div><div class="small">Tỷ lệ quay lại (retention D7/D30)</div></div>
+      <div class="kpi"><div class="big">💬</div><div class="small">Lượng đánh giá & nội dung UGC</div></div>
+      <div class="kpi"><div class="big">🗂️</div><div class="small">Số bộ sưu tập được tạo/chia sẻ</div></div>
+      <div class="kpi"><div class="big">🔁</div><div class="small">Hệ số lan truyền (referral)</div></div>
+      <div class="kpi"><div class="big">💳</div><div class="small">Tỷ lệ chuyển đổi Premium/affiliate</div></div>
+      <div class="kpi"><div class="big">⚡</div><div class="small">Thời gian sinh lịch trình (giây)</div></div>
+    </div>
+
+    <h3>Rủi ro chính & cách giảm thiểu</h3>
+    <table>
+      <thead><tr><th>Rủi ro</th><th>Mức độ</th><th>Giảm thiểu</th></tr></thead>
+      <tbody>
+        <tr><td>Pháp lý/ToS khi crawl TikTok/Google</td><td style="color:var(--danger)">Cao</td><td>Ưu tiên API chính thức, tham vấn luật, lưu nguồn, tôn trọng robots.txt</td></tr>
+        <tr><td>Chất lượng dữ liệu địa điểm kém</td><td style="color:var(--accent)">Trung bình–Cao</td><td>Pipeline làm sạch + UGC + kiểm duyệt; bắt đầu vài thành phố làm thật tốt</td></tr>
+        <tr><td>Chi phí Maps/LLM API tăng vọt</td><td style="color:var(--accent)">Trung bình</td><td>Cache mạnh, giới hạn gọi, dùng OSM cho phần miễn phí, theo dõi ngân sách</td></tr>
+        <tr><td>Lịch trình AI không “đáng tin”</td><td style="color:var(--danger)">Cao</td><td>Kết hợp luật + AI, cho người dùng chỉnh tay, học từ phản hồi</td></tr>
+        <tr><td>Phạm vi quá lớn (ôm đồm)</td><td style="color:var(--accent)">Trung bình</td><td>Bám MVP, ưu tiên MUST trước, giao hàng từng giai đoạn</td></tr>
+        <tr><td>Khởi động cộng đồng (cold start)</td><td style="color:var(--accent)">Trung bình</td><td>Hạt giống dữ liệu sẵn, hợp tác KOL du lịch, ưu đãi đóng góp</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout">✅ <b>Khuyến nghị thứ tự ưu tiên:</b> 1) Tạo lịch trình + địa điểm + đánh giá (MVP) → 2) Bộ sưu tập & xã hội → 3) Crawl + AI nâng cao → 4) Đa ngôn ngữ + mobile → 5) Kiếm tiền & mở rộng toàn cầu.</div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>TripWise · Tài liệu Roadmap — bản nháp để thảo luận. Thời gian & quy mô là ước tính, cần điều chỉnh theo đội ngũ và nguồn lực thực tế.</p>
+    <p style="margin-top:6px">Tạo bởi Kiro · Nền tảng/ngôn ngữ lập trình do bạn lựa chọn.</p>
+  </div>
+</footer>
+
+<script>
+  const tabs = document.querySelectorAll('#tabBar button');
+  const sections = document.querySelectorAll('section');
+  tabs.forEach(btn => btn.addEventListener('click', () => {
+    const t = btn.dataset.t;
+    tabs.forEach(b => b.classList.toggle('active', b === btn));
+    sections.forEach(s => s.classList.toggle('active', s.id === t));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }));
+</script>
+</body>
+</html>
