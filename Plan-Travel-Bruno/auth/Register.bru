@@ -1,0 +1,28 @@
+meta {
+  name: Register
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base_url}}/api/auth/register
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "user1@example.com",
+    "password": "password123",
+    "full_name": "Test User",
+    "avatar_url":"",
+    "phone_number":"",
+    "current_lat":1.1,
+    "current_lng":1.1,
+    "home_address":"214 dinh bo linh"
+  }
+}
+
+vars:pre-request {
+  base_url: http://localhost:8080
+}
