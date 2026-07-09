@@ -49,6 +49,9 @@ func main() {
 
 	// Initialize repositories
 	userRepo := repository.NewUserRepository(db)
+	divRepo := repository.NewAdministrativeDivisionRepository(db)
+	catRepo := repository.NewCategoryRepository(db)
+	placeRepo := repository.NewPlaceRepository(db)
 
 	// Initialize services
 	authService := services.NewAuthService(userRepo)
@@ -56,13 +59,19 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to initialize UploadService: %v", err)
 	}
+	divService := services.NewAdministrativeDivisionService(divRepo)
+	catService := services.NewCategoryService(catRepo)
+	placeService := services.NewPlaceService(placeRepo)
 
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(authService)
 	uploadHandler := handlers.NewUploadHandler(uploadService)
+	adminDivHandler := handlers.NewAdministrativeDivisionHandler(divService)
+	categoryHandler := handlers.NewCategoryHandler(catService)
+	placeHandler := handlers.NewPlaceHandler(placeService)
 
 	// Setup Router
-	r := router.SetupRouter(authHandler, authService, uploadHandler)
+	r := router.SetupRouter(authHandler, authService, uploadHandler, adminDivHandler, categoryHandler, placeHandler)
 
 	// Start server
 	port := config.App.HttpServer.Port
