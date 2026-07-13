@@ -25,7 +25,6 @@ tmp/
 temp/
 
 # Python Virtual Environments & Cache
-python/
 venv/
 .venv/
 env/
