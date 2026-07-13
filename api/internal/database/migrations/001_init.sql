@@ -2,6 +2,8 @@
 -- +goose StatementBegin
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- CREATE EXTENSION IF NOT EXISTS postgis;
+-- CREATE EXTENSION IF NOT EXISTS vector;
 
 CREATE TABLE user_credentials (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -33,39 +35,84 @@ CREATE TABLE administrative_divisions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     parent_id UUID REFERENCES administrative_divisions(id) ON DELETE SET NULL,
     level VARCHAR(50) NOT NULL, -- 'country', 'province', 'city', 'district'
-    name VARCHAR(50) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
     status VARCHAR(50) NOT NULL, -- 'active', 'inactive','deleted'
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_by UUID NOT NULL ,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_by UUID
 );
 CREATE INDEX idx_admin_divisions_parent ON administrative_divisions(parent_id);
 
 CREATE TABLE categories (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    name VARCHAR(50),
+
+    parent_id UUID REFERENCES categories(id),
+
+    code VARCHAR(50) UNIQUE NOT NULL,
+
+    name TEXT NOT NULL,
+
+    icon_url TEXT,
+
+    color VARCHAR(20),
+
+    description TEXT,
+
+    metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+
     status VARCHAR(50) NOT NULL, -- 'active', 'inactive','deleted'
-    icon_url VARCHAR(500)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_by UUID NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_by UUID
 );
-
-
-
 CREATE TABLE places (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    division_id UUID REFERENCES administrative_divisions(id) ON DELETE SET NULL,
-    category_id UUID REFERENCES categories(id) ON DELETE SET NULL,
-    
-    name TEXT NOT NULL,              
-    title VARCHAR(500),                
-    description JSONB NOT NULL DEFAULT '{}'::jsonb, --html 
-    address_raw TEXT NOT NULL,        
-    
-    lat DOUBLE PRECISION NOT NULL,
-    lng DOUBLE PRECISION NOT NULL,
-    images JSONB NOT NULL DEFAULT '[]'::jsonb, 
+
+    category_id UUID REFERENCES categories(id),
+
+    division_id UUID REFERENCES administrative_divisions(id),
+
+    name TEXT NOT NULL,
+
+    aliases TEXT[],
+    short_description TEXT,
+
+    description TEXT,
+
+    address TEXT,
+
+    lat DOUBLE PRECISION,
+
+    lng DOUBLE PRECISION,
+
+    thumbnail TEXT,
+
+    cover_image TEXT,
+
+    images JSONB NOT NULL DEFAULT '[]',
+
+    rating NUMERIC(3,2),
+
+    review_count INT,
+
+    popularity_score DOUBLE PRECISION,
+
+    attributes JSONB NOT NULL DEFAULT '{}',
+
+    ai_data JSONB NOT NULL DEFAULT '{}',
+
+    source_data JSONB NOT NULL DEFAULT '{}',
+
+    metadata JSONB NOT NULL DEFAULT '{}',
+
     status VARCHAR(50) NOT NULL, -- 'active', 'inactive','deleted'
-    metadata JSONB NOT NULL DEFAULT '{}'::jsonb, --{infos : [{field:"price",value:"1000"},{field:"opening_hours",value:"9:00-17:00"}]}, 
-    
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_by UUID NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_by UUID
 );
 
 CREATE INDEX idx_places_division ON places(division_id);
@@ -83,7 +130,11 @@ CREATE TABLE itineraries (
     is_ai_generated BOOLEAN DEFAULT FALSE, 
     lang_code VARCHAR(10) DEFAULT 'vi', 
     status VARCHAR(50) NOT NULL, -- 'active', 'inactive','deleted'
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    status VARCHAR(50) NOT NULL, -- 'active', 'inactive','deleted'
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_by UUID NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_by UUID
 );
 
 CREATE TABLE itinerary_days (
