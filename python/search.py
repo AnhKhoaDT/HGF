@@ -157,7 +157,6 @@ def scrape_url(url):
         "User-Agent": (
             "Mozilla/5.0"
         ),
-                "Authorization":"Bearer jina_b01f7eaea5864747afce07728555e5d3xGaGxTKtFpsycdXx22LJ2HcvVVhx"
 
     }
 
