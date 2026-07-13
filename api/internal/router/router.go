@@ -15,6 +15,9 @@ func SetupRouter(
 	authHandler *handlers.AuthHandler,
 	authService *services.AuthService,
 	uploadHandler *handlers.UploadHandler,
+	adminDivHandler *handlers.AdministrativeDivisionHandler,
+	categoryHandler *handlers.CategoryHandler,
+	placeHandler *handlers.PlaceHandler,
 ) *gin.Engine {
 	r := gin.Default()
 
@@ -54,6 +57,34 @@ func SetupRouter(
 			auth.GET("/me", handlers.AuthMiddleware(authService), authHandler.GetMe)
 			auth.PUT("/me", handlers.AuthMiddleware(authService), authHandler.UpdateMe)
 			auth.PUT("/me/password", handlers.AuthMiddleware(authService), authHandler.UpdatePassword)
+		}
+
+		// Place, Category, and Division routes
+		divisions := api.Group("/administrative-divisions")
+		{
+			divisions.POST("", adminDivHandler.CreateDivision)
+			divisions.GET("", adminDivHandler.ListDivisions)
+			divisions.GET("/:id", adminDivHandler.GetDivision)
+			divisions.PUT("/:id", adminDivHandler.UpdateDivision)
+			divisions.DELETE("/:id", adminDivHandler.DeleteDivision)
+		}
+
+		categories := api.Group("/categories")
+		{
+			categories.POST("", categoryHandler.CreateCategory)
+			categories.GET("", categoryHandler.ListCategories)
+			categories.GET("/:id", categoryHandler.GetCategory)
+			categories.PUT("/:id", categoryHandler.UpdateCategory)
+			categories.DELETE("/:id", categoryHandler.DeleteCategory)
+		}
+
+		places := api.Group("/places")
+		{
+			places.POST("", placeHandler.CreatePlace)
+			places.GET("", placeHandler.ListPlaces)
+			places.GET("/:id", placeHandler.GetPlace)
+			places.PUT("/:id", placeHandler.UpdatePlace)
+			places.DELETE("/:id", placeHandler.DeletePlace)
 		}
 
 		// Protected routes

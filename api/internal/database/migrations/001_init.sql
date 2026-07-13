@@ -33,14 +33,16 @@ CREATE TABLE administrative_divisions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     parent_id UUID REFERENCES administrative_divisions(id) ON DELETE SET NULL,
     level VARCHAR(50) NOT NULL, -- 'country', 'province', 'city', 'district'
-    name_translations JSONB NOT NULL DEFAULT '{}'::jsonb,
+    name VARCHAR(50) NOT NULL,
+    status VARCHAR(50) NOT NULL, -- 'active', 'inactive','deleted'
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX idx_admin_divisions_parent ON administrative_divisions(parent_id);
 
 CREATE TABLE categories (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    name JSONB NOT NULL DEFAULT '{}'::jsonb, -- {"vi": "Khách sạn", "en": "Hotel"}
+    name VARCHAR(50),
+    status VARCHAR(50) NOT NULL, -- 'active', 'inactive','deleted'
     icon_url VARCHAR(500)
 );
 
@@ -53,23 +55,14 @@ CREATE TABLE places (
     
     name TEXT NOT NULL,              
     title VARCHAR(500),                
-    description TEXT,                    
+    description JSONB NOT NULL DEFAULT '{}'::jsonb, --html 
     address_raw TEXT NOT NULL,        
     
     lat DOUBLE PRECISION NOT NULL,
     lng DOUBLE PRECISION NOT NULL,
-    images TEXT[],                
-    
-
-    -- metadata
-    -- Thông tin vận hành cốt lõi
-    -- open_time TIME,                      -- Giờ mở cửa (VD: 07:30:00)
-    -- close_time TIME,                     -- Giờ đóng cửa (VD: 22:00:00)
-    -- price_min NUMERIC(15, 2),            -- Giá thấp nhất (Dùng NUMERIC cho tiền tệ)
-    -- price_max NUMERIC(15, 2),            -- Giá cao nhất
-    -- currency VARCHAR(10) DEFAULT 'VND',  -- Đơn vị tiền tệ
-    
-    metadata_translations JSONB NOT NULL DEFAULT '{}'::jsonb, 
+    images JSONB NOT NULL DEFAULT '[]'::jsonb, 
+    status VARCHAR(50) NOT NULL, -- 'active', 'inactive','deleted'
+    metadata JSONB NOT NULL DEFAULT '{}'::jsonb, --{infos : [{field:"price",value:"1000"},{field:"opening_hours",value:"9:00-17:00"}]}, 
     
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -77,7 +70,6 @@ CREATE TABLE places (
 
 CREATE INDEX idx_places_division ON places(division_id);
 CREATE INDEX idx_places_category ON places(category_id);
-CREATE INDEX idx_places_geo ON places(lat, lng);
 
 
 CREATE TABLE itineraries (
@@ -90,7 +82,7 @@ CREATE TABLE itineraries (
     end_date DATE,
     is_ai_generated BOOLEAN DEFAULT FALSE, 
     lang_code VARCHAR(10) DEFAULT 'vi', 
-    
+    status VARCHAR(50) NOT NULL, -- 'active', 'inactive','deleted'
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -99,6 +91,7 @@ CREATE TABLE itinerary_days (
     itinerary_id UUID REFERENCES itineraries(id) ON DELETE CASCADE,
     day_index INT NOT NULL, 
     date DATE,
+    note TEXT,
     UNIQUE(itinerary_id, day_index) 
 );
 
@@ -110,6 +103,7 @@ CREATE TABLE itinerary_items (
     start_time TIME,
     end_time TIME,
     order_index INT NOT NULL, 
+    note TEXT,
     ai_note_translations JSONB DEFAULT '{}'::jsonb 
 );
 CREATE INDEX idx_itinerary_items_order ON itinerary_items(itinerary_day_id, order_index);
