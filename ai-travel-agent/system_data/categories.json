@@ -1,0 +1,278 @@
+[
+  {
+    "id": "f5407781-07d1-42a8-8b5a-09f22986aac9",
+    "parent_id": null,
+    "code": "SIGHTSEEING_NATURE",
+    "name": "Sightseeing & Nature"
+  },
+  {
+    "id": "b192353b-66e4-473b-877b-ad7e3a4e891d",
+    "parent_id": null,
+    "code": "CULTURE_HERITAGE",
+    "name": "Culture & Heritage"
+  },
+  {
+    "id": "c02c3583-eb56-4340-a6d7-ee152df64988",
+    "parent_id": null,
+    "code": "FOOD_GASTRONOMY",
+    "name": "Food & Gastronomy"
+  },
+  {
+    "id": "be4f3028-ce71-4402-85dc-e0cdad63f887",
+    "parent_id": null,
+    "code": "CAFES_NIGHTLIFE",
+    "name": "Cafes & Nightlife"
+  },
+  {
+    "id": "b533c752-919f-4e4a-a271-8597682f6430",
+    "parent_id": null,
+    "code": "OUTDOOR_ACTIVITIES",
+    "name": "Outdoor & Adventure"
+  },
+  {
+    "id": "f2e8ac73-1499-40d1-9dea-8cc895f66520",
+    "parent_id": null,
+    "code": "ENTERTAINMENT_RELAXATION",
+    "name": "Entertainment & Relax"
+  },
+  {
+    "id": "4fcc8da3-7f53-48b6-bd54-558af5da5cad",
+    "parent_id": null,
+    "code": "ACCOMMODATION",
+    "name": "Stays & Living"
+  },
+  {
+    "id": "e1d30ea0-438c-46ac-ad57-afc02cc91a1a",
+    "parent_id": null,
+    "code": "SHOPPING_MARKETS",
+    "name": "Shopping & Markets"
+  },
+  {
+    "id": "4daefdeb-4ea2-4791-bfe4-29a467728843",
+    "parent_id": "f5407781-07d1-42a8-8b5a-09f22986aac9",
+    "code": "VIEWPOINT_SUNSET",
+    "name": "Sunset & Sunrise Viewpoints"
+  },
+  {
+    "id": "eb911e98-ed62-4482-b7b1-51aba7baaccc",
+    "parent_id": "f5407781-07d1-42a8-8b5a-09f22986aac9",
+    "code": "CLOUD_HUNTING",
+    "name": "Cloud Hunting Spots"
+  },
+  {
+    "id": "0999601d-5a81-41ff-8835-4f3b689781f8",
+    "parent_id": "f5407781-07d1-42a8-8b5a-09f22986aac9",
+    "code": "SCENIC_DRIVE",
+    "name": "Scenic Drives & Mountain Passes"
+  },
+  {
+    "id": "9d5b0abd-86d7-4c47-8c69-93fb460d3821",
+    "parent_id": "f5407781-07d1-42a8-8b5a-09f22986aac9",
+    "code": "LAKE_RESERVOIR",
+    "name": "Lakes & Reservoirs"
+  },
+  {
+    "id": "c263a016-913f-4319-8411-af552b9255ba",
+    "parent_id": "f5407781-07d1-42a8-8b5a-09f22986aac9",
+    "code": "BEACH_COASTLINE",
+    "name": "Beaches & Coastal Bays"
+  },
+  {
+    "id": "91564ce8-35fb-4215-a960-38e5f97f35ee",
+    "parent_id": "f5407781-07d1-42a8-8b5a-09f22986aac9",
+    "code": "WATERFALL_STREAM",
+    "name": "Waterfalls & Natural Streams"
+  },
+  {
+    "id": "5d4b3273-8513-448c-826f-cb7a00576c82",
+    "parent_id": "f5407781-07d1-42a8-8b5a-09f22986aac9",
+    "code": "FLOWER_VALLEY",
+    "name": "Flower Gardens & Agricultural Valleys"
+  },
+  {
+    "id": "81e7e17b-f515-44ea-9639-f9cc0c0677e0",
+    "parent_id": "f5407781-07d1-42a8-8b5a-09f22986aac9",
+    "code": "CAVE_GEOLOGY",
+    "name": "Caves & Geological Wonders"
+  },
+  {
+    "id": "d6207cce-2760-4f3f-ab40-4c2743f46896",
+    "parent_id": "b192353b-66e4-473b-877b-ad7e3a4e891d",
+    "code": "TEMPLE_PAGODA",
+    "name": "Buddhist Pagodas & Temples"
+  },
+  {
+    "id": "e643bfac-efb6-4888-905c-cb3662363482",
+    "parent_id": "b192353b-66e4-473b-877b-ad7e3a4e891d",
+    "code": "CHURCH_CATHEDRAL",
+    "name": "Churches & Cathedrals"
+  },
+  {
+    "id": "cb3fef0b-e457-4b51-b75d-40789d659745",
+    "parent_id": "b192353b-66e4-473b-877b-ad7e3a4e891d",
+    "code": "HISTORICAL_CITADEL",
+    "name": "Historical Citadels & Palaces"
+  },
+  {
+    "id": "544d1c29-c783-401b-a2ec-2c534876c8c0",
+    "parent_id": "b192353b-66e4-473b-877b-ad7e3a4e891d",
+    "code": "WAR_MEMORIAL",
+    "name": "War Relics & Memorial Sites"
+  },
+  {
+    "id": "11686bce-c7ba-4966-9de9-23f9e50ca18d",
+    "parent_id": "b192353b-66e4-473b-877b-ad7e3a4e891d",
+    "code": "MUSEUM_EXHIBITION",
+    "name": "Museums & Art Galleries"
+  },
+  {
+    "id": "bf60ffd8-32ee-47e8-8e4c-1e547285165f",
+    "parent_id": "b192353b-66e4-473b-877b-ad7e3a4e891d",
+    "code": "CRAFT_VILLAGE",
+    "name": "Traditional Craft & Ethnic Villages"
+  },
+  {
+    "id": "347994c5-389d-438c-a300-6e3b0c80e304",
+    "parent_id": "c02c3583-eb56-4340-a6d7-ee152df64988",
+    "code": "LOCAL_SPECIALTY_REST",
+    "name": "Local Specialty Restaurants"
+  },
+  {
+    "id": "b7c9ed68-04f6-4657-8c48-293d58ebb0d5",
+    "parent_id": "c02c3583-eb56-4340-a6d7-ee152df64988",
+    "code": "STREET_FOOD_ALLEY",
+    "name": "Street Food & Food Alleys"
+  },
+  {
+    "id": "dcf5b813-6a3b-404e-88e7-595f203931c8",
+    "parent_id": "c02c3583-eb56-4340-a6d7-ee152df64988",
+    "code": "SEAFOOD_HUB",
+    "name": "Seafood Restaurants & Floating Dining"
+  },
+  {
+    "id": "8c76797c-1bc2-41d5-a158-58ef97550721",
+    "parent_id": "c02c3583-eb56-4340-a6d7-ee152df64988",
+    "code": "VEGETARIAN_VEGAN",
+    "name": "Vegetarian & Vegan Dining"
+  },
+  {
+    "id": "fa016e82-fb04-4e8d-9357-89d780380b0c",
+    "parent_id": "be4f3028-ce71-4402-85dc-e0cdad63f887",
+    "code": "CAFE_SCENIC_VIEW",
+    "name": "Scenic & Valley View Cafes"
+  },
+  {
+    "id": "8b2bc630-8935-417c-bb3d-4ccf3a7cbbb8",
+    "parent_id": "be4f3028-ce71-4402-85dc-e0cdad63f887",
+    "code": "CAFE_GARDEN_CHILL",
+    "name": "Garden & Acoustic Cafes"
+  },
+  {
+    "id": "cfa5ee5a-95c5-4ccf-b611-1cec4942a277",
+    "parent_id": "be4f3028-ce71-4402-85dc-e0cdad63f887",
+    "code": "ROOFTOP_BAR",
+    "name": "Rooftop Bars & Sky Lounges"
+  },
+  {
+    "id": "38a87c13-7cb1-4aa2-a2b1-504f39a42d26",
+    "parent_id": "be4f3028-ce71-4402-85dc-e0cdad63f887",
+    "code": "CLUB_PUB_NIGHTLIFE",
+    "name": "Clubs, Pubs & Live Music Bars"
+  },
+  {
+    "id": "88f32622-a329-4451-b565-bb4d94b0faef",
+    "parent_id": "b533c752-919f-4e4a-a271-8597682f6430",
+    "code": "CAMPING_DIY",
+    "name": "DIY Camping Grounds"
+  },
+  {
+    "id": "71e0a770-b833-4406-a1a2-3391aced3287",
+    "parent_id": "b533c752-919f-4e4a-a271-8597682f6430",
+    "code": "GLAMPING_SERVICE",
+    "name": "Luxury Glamping Campsites"
+  },
+  {
+    "id": "9d576a00-9396-4976-8e36-d854cf5fbc07",
+    "parent_id": "b533c752-919f-4e4a-a271-8597682f6430",
+    "code": "TREKKING_TRAIL",
+    "name": "Trekking & Hiking Trails"
+  },
+  {
+    "id": "3b123360-4a83-4907-baaf-3a4f7f534a19",
+    "parent_id": "b533c752-919f-4e4a-a271-8597682f6430",
+    "code": "WATER_SPORTS",
+    "name": "SUP, Kayaking & Water Sports"
+  },
+  {
+    "id": "66b20dde-828e-4876-967e-7974fcab65f2",
+    "parent_id": "b533c752-919f-4e4a-a271-8597682f6430",
+    "code": "EXTREME_ADVENTURE",
+    "name": "Paragliding, Zipline & Extreme Sports"
+  },
+  {
+    "id": "0272e35d-9232-4979-83fc-fb9a003b3292",
+    "parent_id": "f2e8ac73-1499-40d1-9dea-8cc895f66520",
+    "code": "THEME_AMUSEMENT_PARK",
+    "name": "Theme & Amusement Parks"
+  },
+  {
+    "id": "7b68aea9-66fa-4083-98d2-0dc2fd5fcc02",
+    "parent_id": "f2e8ac73-1499-40d1-9dea-8cc895f66520",
+    "code": "PHOTO_STUDIO_CHECKIN",
+    "name": "Photo Studios & Concept Check-ins"
+  },
+  {
+    "id": "b0ce47b3-388a-4fd8-89ca-97c8b0d8b8e5",
+    "parent_id": "f2e8ac73-1499-40d1-9dea-8cc895f66520",
+    "code": "HOT_SPRING_ONSEN",
+    "name": "Hot Springs, Mud Baths & Onsen"
+  },
+  {
+    "id": "eea9cb6d-893c-47ce-81d8-21749d3e1d89",
+    "parent_id": "f2e8ac73-1499-40d1-9dea-8cc895f66520",
+    "code": "ZOO_SAFARI_FARM",
+    "name": "Zoos, Safaris & Petting Farms"
+  },
+  {
+    "id": "9e4a34d7-ab6f-407d-a6ab-87b164922ea8",
+    "parent_id": "4fcc8da3-7f53-48b6-bd54-558af5da5cad",
+    "code": "RESORT_BEACHFRONT",
+    "name": "Beachfront & Luxury Resorts"
+  },
+  {
+    "id": "9cfeb3e8-15af-4245-8ca9-09d06bce08e6",
+    "parent_id": "4fcc8da3-7f53-48b6-bd54-558af5da5cad",
+    "code": "ECO_LODGE_MOUNTAIN",
+    "name": "Mountain Eco-Lodges & Bungalows"
+  },
+  {
+    "id": "c6000c16-5c84-456b-a970-2726f61e7fde",
+    "parent_id": "4fcc8da3-7f53-48b6-bd54-558af5da5cad",
+    "code": "HOMESTAY_AESTHETIC",
+    "name": "Aesthetic Homestays & Boutiques"
+  },
+  {
+    "id": "0150cfe2-b49a-4efe-a59d-41e4c5098fb7",
+    "parent_id": "4fcc8da3-7f53-48b6-bd54-558af5da5cad",
+    "code": "VILLA_PRIVATE_POOL",
+    "name": "Private Pool Villas for Groups"
+  },
+  {
+    "id": "93585b3e-cd98-4bde-8c64-070a9d177a63",
+    "parent_id": "e1d30ea0-438c-46ac-ad57-afc02cc91a1a",
+    "code": "MARKET_NIGHT_WALKING",
+    "name": "Night Markets & Walking Streets"
+  },
+  {
+    "id": "19324161-b7ce-4b0d-b771-96f3f405682b",
+    "parent_id": "e1d30ea0-438c-46ac-ad57-afc02cc91a1a",
+    "code": "MARKET_TRADITIONAL",
+    "name": "Traditional Wet & Seafood Markets"
+  },
+  {
+    "id": "ac688451-cdba-4473-9fbe-c9bfc1da2020",
+    "parent_id": "e1d30ea0-438c-46ac-ad57-afc02cc91a1a",
+    "code": "SHOP_SPECIALTY_GIFT",
+    "name": "Specialty Gift & Souvenir Stores"
+  }
+]
