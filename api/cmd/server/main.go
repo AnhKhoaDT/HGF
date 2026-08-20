@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	_ "github.com/TranVinhHien/sol-bet88.git/docs"
 	"github.com/TranVinhHien/sol-bet88.git/internal/config"
 	"github.com/TranVinhHien/sol-bet88.git/internal/database"
 	"github.com/TranVinhHien/sol-bet88.git/internal/database/migrations"
@@ -62,6 +63,7 @@ func main() {
 	divService := services.NewAdministrativeDivisionService(divRepo)
 	catService := services.NewCategoryService(catRepo)
 	placeService := services.NewPlaceService(placeRepo)
+	settingService := services.NewSettingService()
 
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(authService)
@@ -69,9 +71,10 @@ func main() {
 	adminDivHandler := handlers.NewAdministrativeDivisionHandler(divService)
 	categoryHandler := handlers.NewCategoryHandler(catService)
 	placeHandler := handlers.NewPlaceHandler(placeService)
+	settingHandler := handlers.NewSettingHandler(settingService)
 
 	// Setup Router
-	r := router.SetupRouter(authHandler, authService, uploadHandler, adminDivHandler, categoryHandler, placeHandler)
+	r := router.SetupRouter(authHandler, authService, uploadHandler, adminDivHandler, categoryHandler, placeHandler, settingHandler)
 
 	// Start server
 	port := config.App.HttpServer.Port

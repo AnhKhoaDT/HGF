@@ -7,6 +7,7 @@ import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../shared/widgets/widgets.dart';
+import '../../../../core/services/biometric_service.dart';
 import '../controllers/auth_controller.dart';
 
 class LoginPage extends StatefulWidget {
@@ -21,6 +22,106 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _biometricService = BiometricService();
+
+  bool _hasSavedAccount = false;
+  String? _savedEmail;
+  String? _savedPassword;
+  bool _canUseBiometric = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedAccount();
+  }
+
+  Future<void> _loadSavedAccount() async {
+    final account = await widget.controller.apiService.getSavedAccount();
+    final isBioEnabled =
+        await widget.controller.apiService.isBiometricEnabled();
+    final isBioAvailable = await _biometricService.isBiometricAvailable();
+
+    if (mounted) {
+      setState(() {
+        if (account != null) {
+          _hasSavedAccount = true;
+          _savedEmail = account['email'];
+          _savedPassword = account['password'];
+          _emailController.text = _savedEmail ?? '';
+        }
+        _canUseBiometric = _hasSavedAccount && isBioEnabled && isBioAvailable;
+      });
+    }
+  }
+
+  Future<void> _showClearAccountDialog() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.card,
+        shape: const RoundedRectangleBorder(borderRadius: AppRadius.brLg),
+        title: Text(
+          AppLocalizationsVi.clearSavedAccountTitle,
+          style: AppTextStyles.h3,
+        ),
+        content: Text(
+          AppLocalizationsVi.clearSavedAccountConfirm,
+          style: AppTextStyles.body,
+        ),
+        actions: [
+          AppTextButton(
+            text: AppLocalizationsVi.cancel,
+            onPressed: () => Navigator.pop(context, false),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: Colors.white,
+              shape: const RoundedRectangleBorder(borderRadius: AppRadius.brSm),
+            ),
+            child: Text(AppLocalizationsVi.confirm),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await widget.controller.apiService.clearSavedAccount();
+      if (!mounted) return;
+      setState(() {
+        _hasSavedAccount = false;
+        _savedEmail = null;
+        _savedPassword = null;
+        _canUseBiometric = false;
+        _emailController.clear();
+        _passwordController.clear();
+      });
+      showAppSnackBar(context, AppLocalizationsVi.clearSavedAccountSuccess);
+    }
+  }
+
+  Future<void> _handleBiometricLogin() async {
+    if (_savedEmail == null || _savedPassword == null) return;
+
+    final authenticated = await _biometricService.authenticate(
+      localizedReason: AppLocalizationsVi.biometricReason,
+    );
+
+    if (authenticated) {
+      _emailController.text = _savedEmail!;
+      _passwordController.text = _savedPassword!;
+      await _handleLogin();
+    } else {
+      if (mounted) {
+        showAppSnackBar(
+          context,
+          AppLocalizationsVi.biometricAuthFailed,
+          isError: true,
+        );
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -82,6 +183,16 @@ class _LoginPageState extends State<LoginPage> {
                       keyboardType: TextInputType.emailAddress,
                       prefixIcon: const Icon(Icons.email_outlined,
                           color: AppColors.textTertiary, size: AppSizes.iconMd),
+                      suffixIcon: _hasSavedAccount
+                          ? IconButton(
+                              icon: const Icon(
+                                Icons.edit_outlined,
+                                color: AppColors.primary,
+                                size: 20,
+                              ),
+                              onPressed: _showClearAccountDialog,
+                            )
+                          : null,
                       validator: Validators.validateEmail,
                     ),
                     AppSpacing.gapMd,
@@ -103,6 +214,16 @@ class _LoginPageState extends State<LoginPage> {
                       text: AppLocalizationsVi.login,
                       onPressed: _handleLogin,
                     ),
+                    if (_canUseBiometric) ...[
+                      AppSpacing.gapSm,
+                      AppButton(
+                        text: AppLocalizationsVi.biometricLogin,
+                        variant: AppButtonVariant.outline,
+                        icon: const Icon(Icons.fingerprint_rounded,
+                            color: AppColors.primary, size: 24),
+                        onPressed: _handleBiometricLogin,
+                      ),
+                    ],
                     const SizedBox(height: AppSpacing.lg),
                     _divider(),
                     const SizedBox(height: AppSpacing.lg),
