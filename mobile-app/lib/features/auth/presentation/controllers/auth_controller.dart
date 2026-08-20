@@ -1,23 +1,18 @@
 import '../../../../core/store/app_actions.dart';
 import '../../../../core/store/app_store.dart';
-import '../../data/datasources/auth_local_data_source.dart';
+import '../../data/services/auth_api_service.dart';
 import '../../domain/usecases/get_current_user_usecase.dart';
 import '../../domain/usecases/login_with_email_password.dart';
 import '../../domain/usecases/logout_usecase.dart';
 import '../../domain/usecases/register_usecase.dart';
 
-/// Tầng "thunk" cho Auth: thực hiện side-effect (gọi use-case) rồi dispatch
-/// các action kết quả vào [AppStore]. Reducer là nơi duy nhất đổi state.
-///
-/// Cách này giữ nguyên tầng data/domain hiện có, đồng thời đưa toàn bộ
-/// trạng thái auth về store dùng chung cho cả Web & Mobile.
 class AuthController {
   final AppStore store;
   final RegisterUseCase registerUseCase;
   final LoginWithEmailPassword loginUseCase;
   final GetCurrentUserUseCase getCurrentUserUseCase;
   final LogoutUseCase logoutUseCase;
-  final AuthLocalDataSource localDataSource;
+  final AuthApiService apiService;
 
   AuthController({
     required this.store,
@@ -25,14 +20,13 @@ class AuthController {
     required this.loginUseCase,
     required this.getCurrentUserUseCase,
     required this.logoutUseCase,
-    required this.localDataSource,
+    required this.apiService,
   });
 
-  /// Kiểm tra trạng thái đăng nhập khi mở app.
   Future<bool> checkLoginStatus() async {
     store.dispatch(const AuthStarted());
     try {
-      final token = await localDataSource.getAccessToken();
+      final token = await apiService.getAccessToken();
       if (token == null || token.isEmpty) {
         store.dispatch(const AuthUnauthenticated());
         return false;
@@ -40,7 +34,7 @@ class AuthController {
       final result = await getCurrentUserUseCase.call();
       return result.fold(
         (failure) async {
-          await localDataSource.clearTokens();
+          await apiService.clearTokens();
           store.dispatch(const AuthUnauthenticated());
           return false;
         },
@@ -71,18 +65,20 @@ class AuthController {
   }
 
   Future<bool> register({
+    required String fullName,
     required String username,
     required String email,
     required String password,
   }) async {
     store.dispatch(const AuthStarted());
     try {
-      final user = await registerUseCase.call(
+      await registerUseCase.call(
+        fullName: fullName,
         username: username,
         email: email,
         password: password,
       );
-      store.dispatch(AuthSucceeded(user));
+      store.dispatch(const AuthUnauthenticated());
       return true;
     } catch (e) {
       store.dispatch(AuthFailed(e.toString().replaceAll('Exception: ', '')));

@@ -2,36 +2,27 @@ import 'package:dartz/dartz.dart';
 import '../../../../core/errors/failures.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
-import '../datasources/auth_local_data_source.dart';
-import '../datasources/auth_remote_data_source.dart';
+import '../services/auth_api_service.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
-  final AuthRemoteDataSource remoteDataSource;
-  final AuthLocalDataSource localDataSource; 
+  final AuthApiService apiService;
 
-  AuthRepositoryImpl({
-    required this.remoteDataSource,
-    required this.localDataSource,
-  });
+  AuthRepositoryImpl({required this.apiService});
 
   @override
   Future<UserEntity> register({
+    required String fullName,
     required String username,
     required String email,
     required String password,
   }) async {
-    final authResponse = await remoteDataSource.register(
+    final response = await apiService.register(
+      fullName: fullName,
       username: username,
       email: email,
       password: password,
     );
-
-    await localDataSource.saveTokens(
-      accessToken: authResponse.accessToken,
-      refreshToken: authResponse.refreshToken,
-    );
-
-    return authResponse.user;
+    return response.user;
   }
 
   @override
@@ -40,14 +31,19 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
   }) async {
     try {
-      final authResponse = await remoteDataSource.login(
+      final authResponse = await apiService.login(
         email: email,
         password: password,
       );
 
-      await localDataSource.saveTokens(
-        accessToken: authResponse.accessToken,
+      await apiService.saveTokens(
+        token: authResponse.accessToken,
         refreshToken: authResponse.refreshToken,
+      );
+
+      await apiService.saveSavedAccount(
+        email: email,
+        password: password,
       );
 
       return Right(authResponse.user);
@@ -57,68 +53,13 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, UserEntity>> loginWithGoogle() {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<Either<Failure, UserEntity>> loginWithApple() {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<Either<Failure, UserEntity>> loginWithFacebook() {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<Either<Failure, String>> sendPhoneVerificationCode({
-    required String phoneNumber,
-  }) {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<Either<Failure, UserEntity>> verifyPhoneCode({
-    required String verificationId,
-    required String code,
-  }) {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<Either<Failure, void>> sendPasswordResetEmail({
-    required String email,
-  }) {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<Either<Failure, void>> changePassword({
-    required String currentPassword,
-    required String newPassword,
-  }) {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<Either<Failure, void>> sendEmailVerification() {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<Either<Failure, bool>> checkEmailVerified() {
-    throw UnimplementedError();
-  }
-
-  @override
   Future<Either<Failure, UserEntity>> getCurrentUser() async {
     try {
-      final token = await localDataSource.getAccessToken();
+      final token = await apiService.getAccessToken();
       if (token == null || token.isEmpty) {
         return const Left(UnauthorizedFailure(message: 'Không tìm thấy phiên đăng nhập'));
       }
-      final user = await remoteDataSource.getCurrentUser(token: token);
+      final user = await apiService.getCurrentUser();
       return Right(user);
     } catch (e) {
       return Left(AuthFailure(message: e.toString().replaceAll('Exception: ', '')));
@@ -128,46 +69,53 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, void>> logout() async {
     try {
-      final refreshToken = await localDataSource.getRefreshToken();
-      if (refreshToken != null && refreshToken.isNotEmpty) {
-        await remoteDataSource.logout(refreshToken: refreshToken);
-      }
-      await localDataSource.clearTokens();
+      await apiService.logout();
       return const Right(null);
     } catch (e) {
-      await localDataSource.clearTokens();
+      await apiService.clearTokens();
       return Left(AuthFailure(message: e.toString().replaceAll('Exception: ', '')));
     }
   }
 
   @override
-  Future<Either<Failure, void>> deleteAccount() {
-    throw UnimplementedError();
-  }
+  Future<Either<Failure, UserEntity>> loginWithGoogle() => throw UnimplementedError();
 
   @override
-  Future<Either<Failure, String>> getIdToken() {
-    throw UnimplementedError();
-  }
+  Future<Either<Failure, UserEntity>> loginWithApple() => throw UnimplementedError();
 
   @override
-  Future<Either<Failure, String>> refreshToken() {
-    throw UnimplementedError();
-  }
+  Future<Either<Failure, UserEntity>> loginWithFacebook() => throw UnimplementedError();
 
   @override
-  Future<Either<Failure, UserEntity>> updateProfile({
-    String? username,
-    String? fullName,
-    String? avatarUrl,
-  }) {
-    throw UnimplementedError();
-  }
+  Future<Either<Failure, String>> sendPhoneVerificationCode({required String phoneNumber}) => throw UnimplementedError();
 
   @override
-  Future<Either<Failure, String>> uploadAvatar({
-    required String imagePath,
-  }) {
-    throw UnimplementedError();
-  }
+  Future<Either<Failure, UserEntity>> verifyPhoneCode({required String verificationId, required String code}) => throw UnimplementedError();
+
+  @override
+  Future<Either<Failure, void>> sendPasswordResetEmail({required String email}) => throw UnimplementedError();
+
+  @override
+  Future<Either<Failure, void>> changePassword({required String currentPassword, required String newPassword}) => throw UnimplementedError();
+
+  @override
+  Future<Either<Failure, void>> sendEmailVerification() => throw UnimplementedError();
+
+  @override
+  Future<Either<Failure, bool>> checkEmailVerified() => throw UnimplementedError();
+
+  @override
+  Future<Either<Failure, void>> deleteAccount() => throw UnimplementedError();
+
+  @override
+  Future<Either<Failure, String>> getIdToken() => throw UnimplementedError();
+
+  @override
+  Future<Either<Failure, String>> refreshToken() => throw UnimplementedError();
+
+  @override
+  Future<Either<Failure, UserEntity>> updateProfile({String? username, String? fullName, String? avatarUrl}) => throw UnimplementedError();
+
+  @override
+  Future<Either<Failure, String>> uploadAvatar({required String imagePath}) => throw UnimplementedError();
 }

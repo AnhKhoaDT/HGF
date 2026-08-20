@@ -50,13 +50,13 @@ class _WelcomePageState extends State<WelcomePage> {
             const Spacer(),
             const AppLogo(size: 84, direction: Axis.vertical),
             const SizedBox(height: AppSpacing.xl),
-            Text(
+            const Text(
               'Lên kế hoạch du lịch\ntrong vài phút',
               textAlign: TextAlign.center,
               style: AppTextStyles.display,
             ),
             const SizedBox(height: AppSpacing.md),
-            Text(
+            const Text(
               'Chọn điểm đến và sở thích — TripWise gợi ý\nnhiều lịch trình tối ưu cho bạn.',
               textAlign: TextAlign.center,
               style: AppTextStyles.bodyLarge,

@@ -18,6 +18,7 @@ func SetupRouter(
 	adminDivHandler *handlers.AdministrativeDivisionHandler,
 	categoryHandler *handlers.CategoryHandler,
 	placeHandler *handlers.PlaceHandler,
+	settingHandler *handlers.SettingHandler,
 ) *gin.Engine {
 	r := gin.Default()
 
@@ -47,6 +48,9 @@ func SetupRouter(
 	// API routes
 	api := r.Group("/api")
 	{
+		// Public System Settings
+		api.GET("/settings", settingHandler.GetSettings)
+
 		// Auth routes (public)
 		auth := api.Group("/auth")
 		{
