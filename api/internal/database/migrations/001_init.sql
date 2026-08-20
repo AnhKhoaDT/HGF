@@ -130,7 +130,6 @@ CREATE TABLE itineraries (
     is_ai_generated BOOLEAN DEFAULT FALSE, 
     lang_code VARCHAR(10) DEFAULT 'vi', 
     status VARCHAR(50) NOT NULL, -- 'active', 'inactive','deleted'
-    status VARCHAR(50) NOT NULL, -- 'active', 'inactive','deleted'
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_by UUID NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

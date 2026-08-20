@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/spf13/viper"
@@ -90,6 +91,18 @@ var App Config
 func LoadConfig(path string) (*Config, error) {
 	conf := Config{}
 	viper.SetConfigFile(path)
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	viper.AutomaticEnv()
+
+	// Bind environment variables to config keys so Docker Compose env variables override YAML defaults
+	_ = viper.BindEnv("cockroach_db.host", "DB_HOST", "COCKROACH_DB_HOST")
+	_ = viper.BindEnv("cockroach_db.port", "DB_PORT", "COCKROACH_DB_PORT")
+	_ = viper.BindEnv("cockroach_db.user", "DB_USER", "COCKROACH_DB_USER")
+	_ = viper.BindEnv("cockroach_db.password", "DB_PASSWORD", "COCKROACH_DB_PASSWORD")
+	_ = viper.BindEnv("cockroach_db.db_name", "DB_NAME", "COCKROACH_DB_NAME")
+	_ = viper.BindEnv("cockroach_db.ssl_mode", "DB_SSLMODE", "COCKROACH_DB_SSLMODE")
+	_ = viper.BindEnv("http_server.port", "SERVER_PORT", "PORT")
+
 	err := viper.ReadInConfig()
 	if err != nil {
 		return nil, fmt.Errorf("failed to read config file: %w", err)

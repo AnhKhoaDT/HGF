@@ -57,17 +57,17 @@ class Validators {
   }
 
   static String? validateUsername(String? value, {bool isVietnamese = true}) {
-    if (value == null || value.isEmpty) {
+    if (value == null || value.trim().isEmpty) {
       return isVietnamese ? AppLocalizationsVi.usernameRequired : AppLocalizationsEn.usernameRequired;
     }
 
-    if (value.length < 3) {
+    if (value.trim().length < 3) {
       return isVietnamese ? AppLocalizationsVi.usernameTooShort : AppLocalizationsEn.usernameTooShort;
     }
 
-    final usernameRegex = RegExp(r'^[a-zA-Z0-9_]+$');
+    final usernameRegex = RegExp(r'^[\p{L}\p{N}_\s]+$', unicode: true);
 
-    if (!usernameRegex.hasMatch(value)) {
+    if (!usernameRegex.hasMatch(value.trim())) {
       return isVietnamese ? AppLocalizationsVi.usernameInvalid : AppLocalizationsEn.usernameInvalid;
     }
 

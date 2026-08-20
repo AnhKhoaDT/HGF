@@ -47,6 +47,7 @@ class _SignUpPageState extends State<SignUpPage> {
     if (!_formKey.currentState!.validate()) return;
 
     final ok = await widget.controller.register(
+      fullName: _fullNameController.text.trim(),
       username: _usernameController.text.trim(),
       email: _emailController.text.trim(),
       password: _passwordController.text,
@@ -55,7 +56,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
     if (ok) {
       showAppSnackBar(context, AppLocalizationsVi.signUpSuccess);
-      Navigator.of(context).pushNamedAndRemoveUntil('/home', (r) => false);
+      Navigator.of(context).pop();
     } else {
       final msg = widget.controller.store.state.auth.errorMessage ??
           AppLocalizationsVi.signUpFailed;

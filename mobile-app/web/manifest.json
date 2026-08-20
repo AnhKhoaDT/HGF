@@ -1,11 +1,11 @@
 {
-    "name": "hidden_gems_finder",
-    "short_name": "hidden_gems_finder",
+    "name": "Tripwise",
+    "short_name": "Tripwise",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Tripwise Mobile & Web Application",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
