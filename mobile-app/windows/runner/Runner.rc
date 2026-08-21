@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.hiddengems" "\0"
-            VALUE "FileDescription", "hidden_gems_finder" "\0"
+            VALUE "CompanyName", "com.tripwise" "\0"
+            VALUE "FileDescription", "tripwise" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "hidden_gems_finder" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.hiddengems. All rights reserved." "\0"
-            VALUE "OriginalFilename", "hidden_gems_finder.exe" "\0"
-            VALUE "ProductName", "hidden_gems_finder" "\0"
+            VALUE "InternalName", "tripwise" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 com.tripwise. All rights reserved." "\0"
+            VALUE "OriginalFilename", "tripwise.exe" "\0"
+            VALUE "ProductName", "tripwise" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
