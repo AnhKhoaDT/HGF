@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TripWise · Bản xem trước giao diện (Mobile & Web)</title>
+<style>
+  /* ===== Bảng màu tự nhiên, dịu mắt, hạn chế gradient ===== */
+  :root {
+    --paper:      #f4efe6;  /* nền giấy ấm */
+    --paper-2:    #ece4d6;  /* nền phụ */
+    --surface:    #fbf8f2;  /* mặt thẻ */
+    --ink:        #2f342e;  /* chữ chính (gần đen, hơi ấm) */
+    --ink-soft:   #6b7064;  /* chữ phụ */
+    --line:       #ddd4c4;  /* viền */
+    --moss:       #5c7150;  /* xanh rêu - màu thương hiệu */
+    --moss-dark:  #45563c;
+    --moss-soft:  #e7ecdf;  /* nền nhạt của moss */
+    --clay:       #b56a4a;  /* đất nung - màu nhấn */
+    --clay-soft:  #f3e2d8;
+    --sky:        #5a7d8c;  /* xanh biển trầm */
+    --sky-soft:   #e0e8ea;
+    --sun:        #c79a3f;  /* vàng nắng trầm */
+    --sun-soft:   #f3e9d2;
+    --radius:     16px;
+    --shadow:     0 8px 24px rgba(60,55,45,.10);
+    --shadow-sm:  0 2px 8px rgba(60,55,45,.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ===== Thanh trên cùng của trang preview ===== */
+  .page-top {
+    text-align: center;
+    padding: 26px 20px 6px;
+  }
+  .page-top h1 { font-size: 22px; letter-spacing: .2px; }
+  .page-top h1 .leaf { color: var(--moss); }
+  .page-top p { color: var(--ink-soft); font-size: 14px; margin-top: 4px; }
+
+  /* ===== Tab chuyển Mobile / Web ===== */
+  .switcher {
+    display: flex; justify-content: center; gap: 6px;
+    margin: 18px auto 8px;
+    background: var(--paper-2);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 5px;
+    width: max-content;
+  }
+  .switcher button {
+    border: none; background: transparent; cursor: pointer;
+    font-size: 14px; font-weight: 600; color: var(--ink-soft);
+    padding: 9px 22px; border-radius: 999px;
+    display: flex; align-items: center; gap: 7px;
+    transition: .15s;
+  }
+  .switcher button:hover { color: var(--ink); }
+  .switcher button.active {
+    background: var(--surface); color: var(--moss);
+    box-shadow: var(--shadow-sm);
+  }
+  .hint { text-align:center; color: var(--ink-soft); font-size: 12.5px; margin-bottom: 18px; }
+
+  /* ===== Khu vực hiển thị preview ===== */
+  .stage { display: flex; justify-content: center; padding: 8px 16px 70px; }
+  .view { display: none; width: 100%; }
+  .view.active { display: flex; justify-content: center; animation: fade .25s ease; }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: none; } }
+
+  /* ===== Khung điện thoại ===== */
+  .phone {
+    width: 390px; max-width: 100%;
+    height: 800px;
+    background: #20231d;
+    border-radius: 44px;
+    padding: 12px;
+    box-shadow: var(--shadow), 0 0 0 2px #2c2f27 inset;
+    position: relative;
+  }
+  .phone .notch {
+    position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+    width: 150px; height: 26px; background: #20231d; border-radius: 0 0 16px 16px;
+    z-index: 20;
+  }
+  .phone-screen {
+    width: 100%; height: 100%;
+    background: var(--paper);
+    border-radius: 33px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* ===== Khung trình duyệt web ===== */
+  .browser {
+    width: 1080px; max-width: 100%;
+    height: 760px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    display: flex; flex-direction: column;
+  }
+  .browser-bar {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px; background: var(--paper-2);
+    border-bottom: 1px solid var(--line);
+  }
+  .dots { display: flex; gap: 7px; }
+  .dots i { width: 12px; height: 12px; border-radius: 50%; display: block; }
+  .dots .r { background: #d98b7a; } .dots .y { background: #d9bd7a; } .dots .g { background: #9bb37e; }
+  .url {
+    flex: 1; background: var(--surface); border: 1px solid var(--line);
+    border-radius: 8px; padding: 7px 14px; font-size: 13px; color: var(--ink-soft);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .browser-body { flex: 1; overflow: hidden; }
+
+  /* =================================================================
+     APP UI — dùng chung cho cả mobile & web (mỗi khung 1 bản sao)
+     ================================================================= */
+  .app { width: 100%; height: 100%; display: flex; flex-direction: column; background: var(--paper); position: relative; }
+
+  /* App header */
+  .app-head {
+    padding: 16px 18px 14px; background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .brand { display: flex; align-items: center; gap: 9px; font-weight: 800; font-size: 18px; }
+  .brand .mark {
+    width: 30px; height: 30px; border-radius: 9px; background: var(--moss);
+    color: #fff; display: grid; place-items: center; font-size: 16px;
+  }
+  .brand .leaf { color: var(--moss); }
+  .app-head .av {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--clay-soft);
+    border: 1px solid var(--line); display: grid; place-items: center; font-size: 16px;
+  }
+
+  /* Web layout: sidebar + content */
+  .web-shell { display: flex; height: 100%; }
+  .sidebar {
+    width: 210px; flex-shrink: 0; background: var(--surface);
+    border-right: 1px solid var(--line); padding: 14px 12px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .sidebar .nav-item {
+    display: flex; align-items: center; gap: 11px; padding: 11px 13px;
+    border-radius: 10px; font-size: 14px; font-weight: 600; color: var(--ink-soft);
+    cursor: pointer; transition: .12s;
+  }
+  .sidebar .nav-item:hover { background: var(--paper-2); color: var(--ink); }
+  .sidebar .nav-item.active { background: var(--moss-soft); color: var(--moss-dark); }
+  .sidebar .nav-item .ic { font-size: 17px; width: 20px; text-align: center; }
+  .sidebar .spacer { flex: 1; }
+  .sidebar .upsell {
+    background: var(--sun-soft); border: 1px solid var(--line); border-radius: 12px;
+    padding: 13px; font-size: 12.5px; color: var(--ink-soft);
+  }
+  .sidebar .upsell b { color: var(--ink); display: block; margin-bottom: 3px; font-size: 13px; }
+
+  /* The scrollable screen area */
+  .screen { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .screen::-webkit-scrollbar { width: 8px; }
+  .screen::-webkit-scrollbar-thumb { background: var(--line); border-radius: 8px; }
+
+  .pad { padding: 18px; }
+  .pad-lg { padding: 26px 32px; }
+
+  .greet h2 { font-size: 22px; letter-spacing: .2px; }
+  .greet p { color: var(--ink-soft); font-size: 14px; margin-top: 2px; }
+  .web .greet h2 { font-size: 27px; }
+
+  .section-title { font-size: 15px; font-weight: 700; margin: 22px 0 12px; display:flex; align-items:center; gap:8px; }
+  .section-title .line { flex:1; height:1px; background: var(--line); }
+
+  /* Destination select */
+  .field-label { font-size: 13px; font-weight: 600; color: var(--ink-soft); margin-bottom: 8px; }
+  .dest-row { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px; }
+  .dest-row::-webkit-scrollbar { height: 0; }
+  .web .dest-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  .dest {
+    flex-shrink: 0; width: 118px; border: 1px solid var(--line); border-radius: 14px;
+    overflow: hidden; cursor: pointer; background: var(--surface); transition: .14s;
+  }
+  .web .dest { width: auto; }
+  .dest:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+  .dest.sel { border-color: var(--moss); box-shadow: 0 0 0 2px var(--moss-soft); }
+  .dest .ph {
+    height: 72px; display: grid; place-items: center; font-size: 30px;
+  }
+  .dest:nth-child(5n+1) .ph { background: var(--sky-soft); }
+  .dest:nth-child(5n+2) .ph { background: var(--moss-soft); }
+  .dest:nth-child(5n+3) .ph { background: var(--clay-soft); }
+  .dest:nth-child(5n+4) .ph { background: var(--sun-soft); }
+  .dest:nth-child(5n+5) .ph { background: var(--paper-2); }
+  .dest .nm { padding: 8px 10px; font-size: 13px; font-weight: 600; }
+  .dest .nm small { display:block; color: var(--ink-soft); font-weight: 500; font-size: 11px; }
+
+  /* Interest chips */
+  .chips { display: flex; flex-wrap: wrap; gap: 9px; }
+  .chip {
+    border: 1px solid var(--line); background: var(--surface); cursor: pointer;
+    padding: 9px 15px; border-radius: 999px; font-size: 13.5px; font-weight: 600;
+    color: var(--ink); display: flex; align-items: center; gap: 7px; transition: .12s;
+    user-select: none;
+  }
+  .chip:hover { border-color: var(--moss); }
+  .chip.sel { background: var(--moss); border-color: var(--moss); color: #fff; }
+
+  /* Sliders / params */
+  .params { display: grid; gap: 16px; margin-top: 4px; }
+  .web .params { grid-template-columns: 1fr 1fr; gap: 18px 26px; }
+  .param .top { display: flex; justify-content: space-between; font-size: 13.5px; margin-bottom: 6px; }
+  .param .top b { color: var(--moss-dark); }
+  input[type=range] {
+    -webkit-appearance: none; width: 100%; height: 6px; border-radius: 6px;
+    background: var(--paper-2); outline: none;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%;
+    background: var(--moss); cursor: pointer; border: 3px solid var(--surface);
+    box-shadow: var(--shadow-sm);
+  }
+  .seg { display: flex; gap: 6px; }
+  .seg button {
+    flex: 1; border: 1px solid var(--line); background: var(--surface); cursor: pointer;
+    padding: 9px; border-radius: 10px; font-size: 13px; font-weight: 600; color: var(--ink-soft);
+    transition: .12s;
+  }
+  .seg button.sel { background: var(--moss-soft); color: var(--moss-dark); border-color: var(--moss); }
+
+  /* Primary button */
+  .btn {
+    border: none; cursor: pointer; font-family: inherit;
+    background: var(--clay); color: #fff; font-size: 15px; font-weight: 700;
+    padding: 14px 20px; border-radius: 12px; width: 100%;
+    display: flex; align-items: center; justify-content: center; gap: 9px;
+    transition: .14s; box-shadow: var(--shadow-sm);
+  }
+  .btn:hover { background: #a35e40; }
+  .btn:active { transform: translateY(1px); }
+  .btn.ghost { background: var(--surface); color: var(--moss-dark); border: 1px solid var(--line); box-shadow:none; }
+  .btn.ghost:hover { background: var(--moss-soft); }
+  .btn.sm { width: auto; padding: 10px 16px; font-size: 13.5px; }
+
+  .sticky-cta { position: sticky; bottom: 0; padding: 14px 18px; background: linear-gradient(to top, var(--paper) 70%, transparent); }
+
+  /* Itinerary option cards */
+  .opt {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+    padding: 16px; margin-bottom: 14px; cursor: pointer; transition: .14s;
+  }
+  .opt:hover { box-shadow: var(--shadow-sm); transform: translateY(-2px); }
+  .opt .opt-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .opt .opt-head h4 { font-size: 16px; }
+  .opt .tag {
+    font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px;
+    background: var(--moss-soft); color: var(--moss-dark); white-space: nowrap;
+  }
+  .opt .tag.clay { background: var(--clay-soft); color: var(--clay); }
+  .opt .tag.sky { background: var(--sky-soft); color: var(--sky); }
+  .opt .desc { color: var(--ink-soft); font-size: 13.5px; margin: 8px 0 12px; }
+  .opt .stats { display: flex; gap: 18px; font-size: 13px; }
+  .opt .stats .s { display: flex; flex-direction: column; }
+  .opt .stats .s b { font-size: 15px; color: var(--ink); }
+  .opt .stats .s span { color: var(--ink-soft); font-size: 11.5px; }
+  .web .opts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .web .opts-grid .opt { margin-bottom: 0; }
+
+  /* Detail timeline */
+  .day-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .day-tabs button {
+    border: 1px solid var(--line); background: var(--surface); cursor: pointer;
+    padding: 8px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; color: var(--ink-soft);
+  }
+  .day-tabs button.sel { background: var(--moss); color: #fff; border-color: var(--moss); }
+  .timeline { position: relative; padding-left: 26px; }
+  .timeline::before {
+    content:""; position: absolute; left: 8px; top: 6px; bottom: 6px; width: 2px; background: var(--line);
+  }
+  .stop { position: relative; margin-bottom: 18px; }
+  .stop::before {
+    content:""; position: absolute; left: -22px; top: 5px; width: 12px; height: 12px;
+    border-radius: 50%; background: var(--surface); border: 3px solid var(--moss);
+  }
+  .stop .time { font-size: 12px; font-weight: 700; color: var(--clay); }
+  .stop .card2 {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+    padding: 12px 14px; margin-top: 5px; display: flex; gap: 12px; align-items: center;
+  }
+  .stop .card2 .emj {
+    width: 44px; height: 44px; border-radius: 10px; background: var(--paper-2);
+    display: grid; place-items: center; font-size: 22px; flex-shrink: 0;
+  }
+  .stop .card2 .info h5 { font-size: 14.5px; }
+  .stop .card2 .info p { font-size: 12.5px; color: var(--ink-soft); }
+
+  .summary-bar {
+    background: var(--moss-soft); border: 1px solid var(--line); border-radius: 12px;
+    padding: 14px 16px; display: flex; justify-content: space-around; margin-bottom: 18px;
+  }
+  .summary-bar .s { text-align: center; }
+  .summary-bar .s b { display: block; font-size: 17px; color: var(--moss-dark); }
+  .summary-bar .s span { font-size: 11.5px; color: var(--ink-soft); }
+
+  /* Back link */
+  .back { display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+    color: var(--ink-soft); font-size: 13.5px; font-weight: 600; margin-bottom: 14px; }
+  .back:hover { color: var(--moss); }
+
+  /* Bottom nav (mobile) */
+  .tabbar {
+    display: flex; background: var(--surface); border-top: 1px solid var(--line);
+    flex-shrink: 0;
+  }
+  .tabbar button {
+    flex: 1; border: none; background: transparent; cursor: pointer; padding: 10px 0 12px;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    font-size: 10.5px; font-weight: 600; color: var(--ink-soft);
+  }
+  .tabbar button .ic { font-size: 19px; }
+  .tabbar button.active { color: var(--moss); }
+
+  /* loading state */
+  .loading { text-align: center; padding: 50px 20px; color: var(--ink-soft); }
+  .spinner {
+    width: 38px; height: 38px; border: 3px solid var(--line); border-top-color: var(--moss);
+    border-radius: 50%; margin: 0 auto 16px; animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .empty { text-align:center; color: var(--ink-soft); padding: 40px 20px; font-size: 14px; }
+  .empty .big { font-size: 40px; margin-bottom: 10px; }
+
+  @media (max-width: 1140px) {
+    .browser { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="page-top">
+    <h1><span class="leaf">🍃</span> TripWise · Bản xem trước giao diện</h1>
+    <p>Cùng một ứng dụng, xem trên điện thoại và trên web — bấm thử được ngay.</p>
+  </div>
+
+  <div class="switcher" id="switcher">
+    <button class="active" data-v="mobile">📱 Điện thoại</button>
+    <button data-v="web">💻 Web</button>
+  </div>
+  <div class="hint">Mẹo: chọn điểm đến &amp; sở thích → bấm “Tạo lịch trình” → mở một phương án để xem chi tiết.</div>
+
+  <div class="stage">
+    <!-- ============ MOBILE ============ -->
+    <div class="view active" id="view-mobile">
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="phone-screen">
+          <div class="app" data-app="m">
+            <div class="app-head">
+              <div class="brand"><span class="mark">🍃</span><span>Trip<span class="leaf">Wise</span></span></div>
+              <div class="av">🧭</div>
+            </div>
+            <div class="screen" data-screen></div>
+            <div class="tabbar" data-tabbar></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ WEB ============ -->
+    <div class="view" id="view-web">
+      <div class="browser">
+        <div class="browser-bar">
+          <div class="dots"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+          <div class="url">🔒 tripwise.app/plan</div>
+        </div>
+        <div class="browser-body">
+          <div class="app web" data-app="w">
+            <div class="web-shell">
+              <aside class="sidebar">
+                <div class="brand" style="margin:6px 8px 18px"><span class="mark">🍃</span><span>Trip<span class="leaf">Wise</span></span></div>
+                <div class="nav-item active"><span class="ic">✨</span> Tạo lịch trình</div>
+                <div class="nav-item"><span class="ic">🗂️</span> Bộ sưu tập</div>
+                <div class="nav-item"><span class="ic">🧭</span> Khám phá</div>
+                <div class="nav-item"><span class="ic">❤️</span> Yêu thích</div>
+                <div class="nav-item"><span class="ic">👤</span> Hồ sơ</div>
+                <div class="spacer"></div>
+                <div class="upsell"><b>⭐ TripWise Premium</b>AI nâng cao &amp; lịch trình không giới hạn.</div>
+              </aside>
+              <div class="screen" data-screen></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* =========================================================
+   Dữ liệu mẫu
+   ========================================================= */
+const DESTINATIONS = [
+  { id:'dalat', emoji:'🌲', name:'Đà Lạt',   sub:'Lâm Đồng' },
+  { id:'danang',emoji:'🏖️', name:'Đà Nẵng',  sub:'Miền Trung' },
+  { id:'hanoi', emoji:'🏯', name:'Hà Nội',    sub:'Thủ đô' },
+  { id:'hcm',   emoji:'🌆', name:'TP.HCM',    sub:'Miền Nam' },
+  { id:'nhatrang',emoji:'🐚',name:'Nha Trang',sub:'Khánh Hòa' },
+  { id:'hagiang',emoji:'⛰️',name:'Hà Giang', sub:'Đông Bắc' },
+  { id:'phuquoc',emoji:'🌴',name:'Phú Quốc', sub:'Đảo ngọc' },
+  { id:'hoian', emoji:'🏮', name:'Hội An',    sub:'Phố cổ' },
+];
+
+const INTERESTS = [
+  { id:'beach', emoji:'🏝️', name:'Biển' },
+  { id:'mountain', emoji:'⛰️', name:'Núi' },
+  { id:'food', emoji:'🍜', name:'Ẩm thực' },
+  { id:'culture', emoji:'🏛️', name:'Văn hóa' },
+  { id:'adventure', emoji:'🧗', name:'Phiêu lưu' },
+  { id:'chill', emoji:'☕', name:'Thư giãn' },
+  { id:'photo', emoji:'📸', name:'Sống ảo' },
+  { id:'nightlife', emoji:'🌃', name:'Về đêm' },
+];
+
+const PACE = ['Thong thả','Vừa phải','Năng động'];
+
+/* Bộ tạo lịch trình "giả lập" theo lựa chọn */
+function buildOptions(state){
+  const dest = DESTINATIONS.find(d=>d.id===state.dest) || DESTINATIONS[0];
+  const intr = state.interests;
+  const days = state.days;
+  const base = [
+    { id:'balanced', title:'Cân bằng & trọn vẹn', tag:'Gợi ý', cls:'',
+      desc:'Pha trộn hài hòa giữa điểm nổi bật và trải nghiệm địa phương, nhịp độ dễ chịu.' },
+    { id:'foodie', title:'Đậm chất ẩm thực', tag:'Ăn ngon', cls:'clay',
+      desc:'Ưu tiên quán ngon, chợ địa phương và món đặc sản theo từng bữa.' },
+    { id:'explorer', title:'Khám phá tối đa', tag:'Năng động', cls:'sky',
+      desc:'Đi nhiều điểm nhất có thể, tối ưu tuyến đường để tiết kiệm thời gian.' },
+  ];
+  return base.map((o,i)=>{
+    const spots = 3 + days + (i===2?2:0);
+    const cost = (1.2 + i*0.4 + days*0.6).toFixed(1);
+    const walk = (4 + i*2 + days).toFixed(0);
+    return {
+      ...o, dest, spots, cost, walk, days,
+      plan: buildDays(dest, intr, days, o.id),
+    };
+  });
+}
+
+const POOL = {
+  beach:   [['🏖️','Bãi biển','Tắm biển & ngắm bình minh'],['🚤','Cano ra đảo','Lặn ngắm san hô']],
+  mountain:[['⛰️','Đỉnh núi','Săn mây buổi sớm'],['🥾','Đường mòn rừng','Trekking nhẹ giữa thiên nhiên']],
+  food:    [['🍜','Quán đặc sản','Thưởng thức món địa phương'],['☕','Cà phê view đẹp','Nghỉ chân, nhâm nhi']],
+  culture: [['🏛️','Bảo tàng','Tìm hiểu lịch sử vùng đất'],['🏮','Phố cổ','Dạo bộ & chụp ảnh']],
+  adventure:[['🧗','Leo núi nhân tạo','Thử thách bản thân'],['🚵','Đạp xe địa hình','Băng qua đồi thông']],
+  chill:   [['🧖','Spa & onsen','Thư giãn phục hồi'],['🌅','Điểm ngắm hoàng hôn','Chậm lại một nhịp']],
+  photo:   [['📸','Góc sống ảo','Check-in điểm hot'],['🌸','Vườn hoa','Khung hình rực rỡ']],
+  nightlife:[['🌃','Phố đêm','Dạo chợ đêm sôi động'],['🍻','Quán nhạc sống','Nghe acoustic thư giãn']],
+};
+const MEALS = [['08:00','🥐','Ăn sáng','Khởi động ngày mới'],['12:30','🍱','Ăn trưa','Nạp năng lượng'],['19:00','🍲','Ăn tối','Đặc sản buổi tối']];
+
+function buildDays(dest, interests, days, variant){
+  const result = [];
+  const pickList = (interests.length?interests:['food','culture','chill']);
+  for(let d=0; d<days; d++){
+    const stops = [];
+    stops.push({ time:'08:00', emoji:'🥐', name:'Ăn sáng & cà phê', note:'Bắt đầu ngày tại '+dest.name });
+    // morning activity
+    const k1 = pickList[(d*2) % pickList.length];
+    const a1 = (POOL[k1]||POOL.culture)[0];
+    stops.push({ time:'09:30', emoji:a1[0], name:a1[1], note:a1[2] });
+    stops.push({ time:'12:30', emoji:'🍱', name:'Ăn trưa', note:'Nghỉ trưa & nạp năng lượng' });
+    const k2 = pickList[(d*2+1) % pickList.length];
+    const a2 = (POOL[k2]||POOL.food)[ variant==='explorer' ? 1 : 0 ];
+    stops.push({ time:'14:00', emoji:a2[0], name:a2[1], note:a2[2] });
+    if(variant!=='balanced'){
+      const k3 = pickList[(d*2+2) % pickList.length];
+      const a3 = (POOL[k3]||POOL.photo)[1];
+      stops.push({ time:'16:30', emoji:a3[0], name:a3[1], note:a3[2] });
+    }
+    stops.push({ time:'19:00', emoji:'🍲', name:'Ăn tối', note: (interests.includes('nightlife')?'Khám phá ẩm thực về đêm':'Đặc sản '+dest.name) });
+    if(variant==='explorer' && interests.includes('nightlife')){
+      stops.push({ time:'21:00', emoji:'🌃', name:'Phố đêm', note:'Dạo chơi cuối ngày' });
+    }
+    result.push(stops);
+  }
+  return result;
+}
+
+/* =========================================================
+   State riêng cho từng khung (mobile / web độc lập)
+   ========================================================= */
+function makeState(){
+  return {
+    route: 'plan',         // plan | results | detail
+    dest: 'dalat',
+    interests: ['food','chill'],
+    days: 3,
+    people: 2,
+    pace: 1,
+    options: [],
+    activeOption: null,
+    activeDay: 0,
+    tab: 'plan',
+  };
+}
+
+const apps = {
+  m: { el: document.querySelector('[data-app="m"]'), state: makeState(), kind:'mobile' },
+  w: { el: document.querySelector('[data-app="w"]'), state: makeState(), kind:'web' },
+};
+
+/* =========================================================
+   Render
+   ========================================================= */
+function render(key){
+  const app = apps[key];
+  const s = app.state;
+  const screen = app.el.querySelector('[data-screen]');
+  const tabbar = app.el.querySelector('[data-tabbar]');
+
+  if(s.route==='plan')       screen.innerHTML = viewPlan(s, app.kind);
+  else if(s.route==='results') screen.innerHTML = viewResults(s, app.kind);
+  else if(s.route==='detail')  screen.innerHTML = viewDetail(s, app.kind);
+  screen.scrollTop = 0;
+
+  if(tabbar){ tabbar.innerHTML = viewTabbar(s); }
+  bind(key);
+}
+
+function viewTabbar(s){
+  const items = [
+    ['plan','✨','Tạo'],
+    ['collections','🗂️','Bộ sưu tập'],
+    ['explore','🧭','Khám phá'],
+    ['profile','👤','Hồ sơ'],
+  ];
+  return items.map(([id,ic,label])=>
+    `<button data-tab="${id}" class="${s.tab===id?'active':''}"><span class="ic">${ic}</span>${label}</button>`
+  ).join('');
+}
+
+function viewPlan(s, kind){
+  const pad = kind==='web' ? 'pad-lg' : 'pad';
+  const destMarkup = DESTINATIONS.map(d=>`
+    <div class="dest ${s.dest===d.id?'sel':''}" data-dest="${d.id}">
+      <div class="ph">${d.emoji}</div>
+      <div class="nm">${d.name}<small>${d.sub}</small></div>
+    </div>`).join('');
+
+  const chips = INTERESTS.map(i=>`
+    <div class="chip ${s.interests.includes(i.id)?'sel':''}" data-int="${i.id}">
+      <span>${i.emoji}</span> ${i.name}
+    </div>`).join('');
+
+  const pace = PACE.map((p,i)=>`<button data-pace="${i}" class="${s.pace===i?'sel':''}">${p}</button>`).join('');
+
+  return `
+    <div class="${pad}">
+      <div class="greet">
+        <h2>Bạn muốn đi đâu? 🧭</h2>
+        <p>Chọn vài tiêu chí, TripWise lo phần còn lại.</p>
+      </div>
+
+      <div class="section-title">📍 Điểm đến <span class="line"></span></div>
+      <div class="${kind==='web'?'dest-grid':'dest-row'}">${destMarkup}</div>
+
+      <div class="section-title">🎯 Sở thích <span class="line"></span></div>
+      <div class="chips">${chips}</div>
+
+      <div class="section-title">⚙️ Tùy chỉnh <span class="line"></span></div>
+      <div class="params">
+        <div class="param">
+          <div class="top"><span>Số ngày</span><b data-out="days">${s.days} ngày</b></div>
+          <input type="range" min="1" max="7" value="${s.days}" data-range="days">
+        </div>
+        <div class="param">
+          <div class="top"><span>Số người</span><b data-out="people">${s.people} người</b></div>
+          <input type="range" min="1" max="8" value="${s.people}" data-range="people">
+        </div>
+        <div class="param" ${kind==='web'?'style="grid-column:1/-1"':''}>
+          <div class="top"><span>Nhịp độ</span><b>${PACE[s.pace]}</b></div>
+          <div class="seg">${pace}</div>
+        </div>
+      </div>
+
+      ${kind==='web' ? `<div style="margin-top:24px;max-width:280px"><button class="btn" data-go>✨ Tạo lịch trình</button></div>` : ``}
+    </div>
+    ${kind!=='web' ? `<div class="sticky-cta"><button class="btn" data-go>✨ Tạo lịch trình</button></div>` : ``}
+  `;
+}
+
+function viewResults(s, kind){
+  const pad = kind==='web' ? 'pad-lg' : 'pad';
+  const dest = DESTINATIONS.find(d=>d.id===s.dest);
+  const intrNames = s.interests.map(id=>INTERESTS.find(i=>i.id===id)?.name).filter(Boolean).join(' · ') || 'Tự do';
+  const cards = s.options.map(o=>`
+    <div class="opt" data-open="${o.id}">
+      <div class="opt-head">
+        <h4>${o.title}</h4>
+        <span class="tag ${o.cls}">${o.tag}</span>
+      </div>
+      <p class="desc">${o.desc}</p>
+      <div class="stats">
+        <div class="s"><b>${o.days}</b><span>ngày</span></div>
+        <div class="s"><b>${o.spots}</b><span>điểm đến</span></div>
+        <div class="s"><b>${o.cost}tr</b><span>ước tính/người</span></div>
+        <div class="s"><b>${o.walk}km</b><span>di chuyển</span></div>
+      </div>
+    </div>`).join('');
+
+  return `
+    <div class="${pad}">
+      <span class="back" data-back="plan">← Đổi tiêu chí</span>
+      <div class="greet">
+        <h2>${dest.emoji} ${s.days} ngày ở ${dest.name}</h2>
+        <p>${intrNames} · ${s.people} người · ${PACE[s.pace]}</p>
+      </div>
+      <div class="section-title">✨ ${s.options.length} phương án gợi ý <span class="line"></span></div>
+      <div class="${kind==='web'?'opts-grid':''}">${cards}</div>
+    </div>
+  `;
+}
+
+function viewDetail(s, kind){
+  const pad = kind==='web' ? 'pad-lg' : 'pad';
+  const o = s.options.find(x=>x.id===s.activeOption);
+  if(!o) return `<div class="empty"><div class="big">🤔</div>Không tìm thấy lịch trình.</div>`;
+  const dayBtns = o.plan.map((_,i)=>`<button data-day="${i}" class="${s.activeDay===i?'sel':''}">Ngày ${i+1}</button>`).join('');
+  const stops = (o.plan[s.activeDay]||[]).map(st=>`
+    <div class="stop">
+      <div class="time">${st.time}</div>
+      <div class="card2">
+        <div class="emj">${st.emoji}</div>
+        <div class="info"><h5>${st.name}</h5><p>${st.note}</p></div>
+      </div>
+    </div>`).join('');
+
+  return `
+    <div class="${pad}">
+      <span class="back" data-back="results">← Các phương án</span>
+      <div class="greet">
+        <h2>${o.title}</h2>
+        <p>${o.dest.emoji} ${o.dest.name} · ${o.days} ngày · ${o.spots} điểm đến</p>
+      </div>
+
+      <div class="summary-bar" style="margin-top:16px">
+        <div class="s"><b>${o.cost}tr</b><span>Chi phí/người</span></div>
+        <div class="s"><b>${o.walk}km</b><span>Di chuyển</span></div>
+        <div class="s"><b>${o.spots}</b><span>Điểm đến</span></div>
+      </div>
+
+      <div class="day-tabs">${dayBtns}</div>
+      <div class="timeline">${stops}</div>
+
+      <div style="display:flex;gap:10px;margin-top:18px">
+        <button class="btn sm" data-save>💾 Lưu lịch trình</button>
+        <button class="btn ghost sm" data-back="results">↺ Xem phương án khác</button>
+      </div>
+    </div>
+  `;
+}
+
+/* =========================================================
+   Bind sự kiện
+   ========================================================= */
+function bind(key){
+  const app = apps[key];
+  const s = app.state;
+  const root = app.el.querySelector('[data-screen]');
+  const tabbar = app.el.querySelector('[data-tabbar]');
+
+  // chọn điểm đến
+  root.querySelectorAll('[data-dest]').forEach(el=>{
+    el.onclick = ()=>{ s.dest = el.dataset.dest; render(key); };
+  });
+  // chọn sở thích (toggle)
+  root.querySelectorAll('[data-int]').forEach(el=>{
+    el.onclick = ()=>{
+      const id = el.dataset.int;
+      const i = s.interests.indexOf(id);
+      if(i>=0) s.interests.splice(i,1); else s.interests.push(id);
+      render(key);
+    };
+  });
+  // sliders
+  root.querySelectorAll('[data-range]').forEach(el=>{
+    el.oninput = ()=>{
+      const k = el.dataset.range;
+      s[k] = parseInt(el.value,10);
+      const out = root.querySelector(`[data-out="${k}"]`);
+      if(out) out.textContent = s[k] + (k==='days'?' ngày':' người');
+    };
+  });
+  // nhịp độ
+  root.querySelectorAll('[data-pace]').forEach(el=>{
+    el.onclick = ()=>{ s.pace = parseInt(el.dataset.pace,10); render(key); };
+  });
+  // tạo lịch trình
+  const go = root.querySelector('[data-go]');
+  if(go) go.onclick = ()=>generate(key);
+  // mở phương án
+  root.querySelectorAll('[data-open]').forEach(el=>{
+    el.onclick = ()=>{ s.activeOption = el.dataset.open; s.activeDay = 0; s.route='detail'; render(key); };
+  });
+  // đổi ngày
+  root.querySelectorAll('[data-day]').forEach(el=>{
+    el.onclick = ()=>{ s.activeDay = parseInt(el.dataset.day,10); render(key); };
+  });
+  // back
+  root.querySelectorAll('[data-back]').forEach(el=>{
+    el.onclick = ()=>{ s.route = el.dataset.back; render(key); };
+  });
+  // lưu
+  const save = root.querySelector('[data-save]');
+  if(save) save.onclick = ()=>{
+    save.textContent = '✓ Đã lưu vào bộ sưu tập';
+    save.style.background = 'var(--moss)';
+  };
+
+  // tabbar (mobile)
+  if(tabbar){
+    tabbar.querySelectorAll('[data-tab]').forEach(el=>{
+      el.onclick = ()=>{
+        s.tab = el.dataset.tab;
+        if(el.dataset.tab==='plan'){ s.route='plan'; }
+        render(key);
+        if(el.dataset.tab!=='plan'){ showStub(key, el.dataset.tab); }
+      };
+    });
+  }
+}
+
+function showStub(key, tab){
+  const app = apps[key];
+  const screen = app.el.querySelector('[data-screen]');
+  const map = {
+    collections:['🗂️','Bộ sưu tập','Lưu và sắp xếp lịch trình theo từng thành phố.'],
+    explore:['🧭','Khám phá','Bảng tin lịch trình & địa điểm hot từ cộng đồng.'],
+    profile:['👤','Hồ sơ của bạn','Sở thích, huy hiệu và lịch trình đã lưu.'],
+  };
+  const m = map[tab]; if(!m) return;
+  screen.innerHTML = `<div class="empty"><div class="big">${m[0]}</div><b style="color:var(--ink);font-size:16px">${m[1]}</b><p style="margin-top:6px">${m[2]}</p><p style="margin-top:18px;font-size:12.5px">(Phần demo — quay lại tab “Tạo” để thử luồng chính)</p></div>`;
+}
+
+function generate(key){
+  const app = apps[key];
+  const s = app.state;
+  const screen = app.el.querySelector('[data-screen]');
+  screen.innerHTML = `<div class="loading"><div class="spinner"></div>Đang tạo lịch trình tối ưu cho bạn…</div>`;
+  setTimeout(()=>{
+    s.options = buildOptions(s);
+    s.route = 'results';
+    render(key);
+  }, 850);
+}
+
+/* =========================================================
+   Chuyển tab Mobile / Web
+   ========================================================= */
+document.querySelectorAll('#switcher button').forEach(btn=>{
+  btn.onclick = ()=>{
+    document.querySelectorAll('#switcher button').forEach(b=>b.classList.toggle('active', b===btn));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    document.getElementById('view-'+btn.dataset.v).classList.add('active');
+  };
+});
+
+/* init */
+render('m');
+render('w');
+</script>
+</body>
+</html>

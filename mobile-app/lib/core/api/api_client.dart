@@ -3,8 +3,9 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiClient {
   late final Dio dio;
+  void Function()? onUnauthorized;
 
-  ApiClient() {
+  ApiClient({this.onUnauthorized}) {
     final baseUrl = dotenv.env['BACKEND_URL'] ?? '';
 
     dio = Dio(
@@ -15,6 +16,17 @@ class ApiClient {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+        },
+      ),
+    );
+
+    dio.interceptors.add(
+      InterceptorsWrapper(
+        onError: (DioException error, handler) {
+          if (error.response?.statusCode == 401) {
+            onUnauthorized?.call();
+          }
+          return handler.next(error);
         },
       ),
     );

@@ -7,11 +7,13 @@ class RegisterUseCase {
     RegisterUseCase({required this.repository});
 
     Future<UserEntity> call({
+        required String fullName,
         required String username,
         required String email,
         required String password,
     }) {
         return repository.register(
+            fullName: fullName,
             username: username,
             email: email,
             password: password,

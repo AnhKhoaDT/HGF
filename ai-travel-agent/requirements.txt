@@ -1,0 +1,10 @@
+langchain
+langchain-google-genai
+pydantic
+psycopg2-binary
+sqlalchemy
+python-dotenv
+duckduckgo-search
+beautifulsoup4
+requests
+ddgs
