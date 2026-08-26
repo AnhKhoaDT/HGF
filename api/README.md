@@ -82,3 +82,69 @@ go mod tidy
 go run cmd/server/main.go
 ```
 The API server will listen on the port configured in `http_server.port` (default is `:8080`).
+
+---
+
+## Database Access
+
+### Connection Info
+
+| Field    | Value       |
+|----------|-------------|
+| Host     | `localhost` |
+| Port     | `5432`      |
+| User     | `postgres`  |
+| Password | `postgres`  |
+| Database | `travel`    |
+
+---
+
+### Start the Database (Docker/Podman)
+
+```bash
+# Trong thư mục api/
+sudo docker-compose up postgres -d
+
+# Kiểm tra trạng thái
+sudo docker ps
+```
+
+---
+
+### Kết nối qua CLI (psql)
+
+```bash
+# Kết nối trực tiếp qua Docker container
+sudo docker exec -it bet88-postgres psql -U postgres -d travel
+
+# Hoặc kết nối qua psql local (nếu đã cài)
+psql -h localhost -p 5432 -U postgres -d travel
+```
+
+Một số lệnh psql hay dùng:
+
+```sql
+-- Liệt kê tất cả tables
+\dt
+
+-- Xem cấu trúc một bảng
+\d ten_table
+
+-- Xem data
+SELECT * FROM ten_table LIMIT 10;
+
+-- Thoát
+\q
+```
+
+---
+
+### Kết nối qua GUI Tool
+
+Dùng **TablePlus**, **DBeaver**, hoặc **pgAdmin** với thông tin:
+
+- **Host**: `localhost`
+- **Port**: `5432`
+- **Username**: `postgres`
+- **Password**: `postgres`
+- **Database**: `travel`

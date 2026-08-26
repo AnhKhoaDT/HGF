@@ -1,5 +1,5 @@
 # 📋 Bảng Phân Chia Công Việc & Nhiệm Vụ (Task Assignment)
-## Dự án: TripWise (Hidden Gems Finder) — Giai đoạn MVP & Social (P1 & P2)
+## Dự án: TripWise — Giai đoạn MVP & Social (P1 & P2)
 
 Tài liệu này phân rã và phân chia công việc chi tiết cho đội ngũ phát triển gồm **3 thành viên**:
 1. **Developer 1: Backend Engineer (Go)** — Phụ trách phát triển API, cơ sở dữ liệu địa lý (PostGIS) và hạ tầng.
