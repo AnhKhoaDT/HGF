@@ -45,7 +45,7 @@ func SetupRouter(
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// API routes
-	api := r.Group("/api")
+	api := r.Group("/api/v1")
 	{
 		// Auth routes (public)
 		auth := api.Group("/auth")

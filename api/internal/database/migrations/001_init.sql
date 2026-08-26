@@ -5,7 +5,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- CREATE EXTENSION IF NOT EXISTS postgis;
 -- CREATE EXTENSION IF NOT EXISTS vector;
 
-CREATE TABLE user_credentials (
+CREATE TABLE IF NOT EXISTS user_credentials (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
@@ -16,7 +16,7 @@ CREATE TABLE user_credentials (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE user_profiles (
+CREATE TABLE IF NOT EXISTS user_profiles (
     user_id UUID PRIMARY KEY REFERENCES user_credentials(id) ON DELETE CASCADE,
     full_name VARCHAR(255),
     avatar_url VARCHAR(500),
@@ -31,7 +31,7 @@ CREATE TABLE user_profiles (
 );
 
 
-CREATE TABLE administrative_divisions (
+CREATE TABLE IF NOT EXISTS administrative_divisions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     parent_id UUID REFERENCES administrative_divisions(id) ON DELETE SET NULL,
     level VARCHAR(50) NOT NULL, -- 'country', 'province', 'city', 'district'
@@ -43,9 +43,9 @@ CREATE TABLE administrative_divisions (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_by UUID
 );
-CREATE INDEX idx_admin_divisions_parent ON administrative_divisions(parent_id);
+CREATE INDEX IF NOT EXISTS idx_admin_divisions_parent ON administrative_divisions(parent_id);
 
-CREATE TABLE categories (
+CREATE TABLE IF NOT EXISTS categories (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
 
     parent_id UUID REFERENCES categories(id),
@@ -68,7 +68,7 @@ CREATE TABLE categories (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_by UUID
 );
-CREATE TABLE places (
+CREATE TABLE IF NOT EXISTS places (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
 
     category_id UUID REFERENCES categories(id),
@@ -115,11 +115,11 @@ CREATE TABLE places (
     updated_by UUID
 );
 
-CREATE INDEX idx_places_division ON places(division_id);
-CREATE INDEX idx_places_category ON places(category_id);
+CREATE INDEX IF NOT EXISTS idx_places_division ON places(division_id);
+CREATE INDEX IF NOT EXISTS idx_places_category ON places(category_id);
 
 
-CREATE TABLE itineraries (
+CREATE TABLE IF NOT EXISTS itineraries (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID REFERENCES user_credentials(id) ON DELETE CASCADE,
     division_id UUID REFERENCES administrative_divisions(id) ON DELETE SET NULL, 
@@ -130,14 +130,13 @@ CREATE TABLE itineraries (
     is_ai_generated BOOLEAN DEFAULT FALSE, 
     lang_code VARCHAR(10) DEFAULT 'vi', 
     status VARCHAR(50) NOT NULL, -- 'active', 'inactive','deleted'
-    status VARCHAR(50) NOT NULL, -- 'active', 'inactive','deleted'
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_by UUID NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_by UUID
 );
 
-CREATE TABLE itinerary_days (
+CREATE TABLE IF NOT EXISTS itinerary_days (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     itinerary_id UUID REFERENCES itineraries(id) ON DELETE CASCADE,
     day_index INT NOT NULL, 
@@ -146,7 +145,7 @@ CREATE TABLE itinerary_days (
     UNIQUE(itinerary_id, day_index) 
 );
 
-CREATE TABLE itinerary_items (
+CREATE TABLE IF NOT EXISTS itinerary_items (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     itinerary_day_id UUID REFERENCES itinerary_days(id) ON DELETE CASCADE,
     place_id UUID REFERENCES places(id) ON DELETE CASCADE,
@@ -157,7 +156,7 @@ CREATE TABLE itinerary_items (
     note TEXT,
     ai_note_translations JSONB DEFAULT '{}'::jsonb 
 );
-CREATE INDEX idx_itinerary_items_order ON itinerary_items(itinerary_day_id, order_index);
+CREATE INDEX IF NOT EXISTS idx_itinerary_items_order ON itinerary_items(itinerary_day_id, order_index);
 
 
 -- +goose StatementEnd
