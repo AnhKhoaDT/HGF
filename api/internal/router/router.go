@@ -19,6 +19,7 @@ func SetupRouter(
 	categoryHandler *handlers.CategoryHandler,
 	placeHandler *handlers.PlaceHandler,
 	settingHandler *handlers.SettingHandler,
+	itineraryHandler *handlers.ItineraryHandler,
 ) *gin.Engine {
 	r := gin.Default()
 
@@ -97,7 +98,15 @@ func SetupRouter(
 		{
 			// Add other protected routes here
 			protected.POST("/upload", uploadHandler.UploadImage)
-		}
+			
+			itineraries := protected.Group("/itineraries")
+			{
+				itineraries.POST("", itineraryHandler.CreateItinerary)
+				itineraries.GET("", itineraryHandler.ListItineraries)
+				itineraries.GET("/:id", itineraryHandler.GetItinerary)
+				itineraries.PUT("/:id", itineraryHandler.UpdateItinerary)
+				itineraries.DELETE("/:id", itineraryHandler.DeleteItinerary)
+			}		}
 	}
 
 	return r

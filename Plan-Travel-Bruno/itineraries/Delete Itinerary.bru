@@ -1,0 +1,15 @@
+meta {
+  name: Delete Itinerary
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{base_url}}/api/v1/itineraries/{{itinerary_id}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}

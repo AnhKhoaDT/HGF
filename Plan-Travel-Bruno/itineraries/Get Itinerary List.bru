@@ -1,0 +1,15 @@
+meta {
+  name: Get Itinerary List
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{base_url}}/api/v1/itineraries?page=1&limit=10&status=active
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
