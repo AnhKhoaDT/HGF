@@ -1,23 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../../../core/di/app_module.dart';
 import '../../../../core/localization/app_localizations_vi.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../../explore/presentation/pages/explore_page.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
+import '../../../trips/presentation/pages/trips_page.dart';
 import '../../data/services/home_api_service.dart';
-import 'explore_page.dart';
 import 'home_page.dart';
-import 'trips_page.dart';
 
 class MainScreen extends StatefulWidget {
-  final AuthController controller;
-  final HomeApiService homeApiService;
+  final AuthController? controller;
+  final HomeApiService? homeApiService;
 
   const MainScreen({
     super.key,
-    required this.controller,
-    required this.homeApiService,
+    this.controller,
+    this.homeApiService,
   });
 
   @override
@@ -32,17 +33,20 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
+    final authCtrl = widget.controller ?? sl<AuthController>();
+    final homeApi = widget.homeApiService ?? sl<HomeApiService>();
+
     _pages = [
       HomePage(
-        controller: widget.controller,
-        homeApiService: widget.homeApiService,
+        controller: authCtrl,
+        homeApiService: homeApi,
       ),
       ExplorePage(
-        homeApiService: widget.homeApiService,
+        homeApiService: homeApi,
       ),
       const TripsPage(),
       ProfilePage(
-        controller: widget.controller,
+        controller: authCtrl,
         showBackButton: false,
       ),
     ];

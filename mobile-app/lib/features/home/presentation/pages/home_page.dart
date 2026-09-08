@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/di/app_module.dart';
 import '../../../../core/localization/app_localizations_vi.dart';
 import '../../../../core/store/app_state.dart';
 import '../../../../core/store/store_provider.dart';
@@ -7,16 +8,19 @@ import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../shared/widgets/widgets.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../../categories/domain/entities/category_entity.dart';
+import '../../../places/domain/entities/place_entity.dart';
+import '../../data/repositories/home_repository_impl.dart';
 import '../../data/services/home_api_service.dart';
 
 class HomePage extends StatefulWidget {
-  final AuthController controller;
-  final HomeApiService homeApiService;
+  final AuthController? controller;
+  final HomeApiService? homeApiService;
 
   const HomePage({
     super.key,
-    required this.controller,
-    required this.homeApiService,
+    this.controller,
+    this.homeApiService,
   });
 
   @override
@@ -24,8 +28,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<Map<String, dynamic>> _places = [];
-  List<Map<String, dynamic>> _categories = [];
+  List<PlaceEntity> _places = [];
+  List<CategoryEntity> _categories = [];
   bool _isLoading = true;
   int _selectedCategoryIndex = -1;
 
@@ -37,14 +41,13 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _fetchData() async {
     setState(() => _isLoading = true);
-    final results = await Future.wait([
-      widget.homeApiService.fetchFeaturedPlaces(limit: 6),
-      widget.homeApiService.fetchCategories(),
-    ]);
+    final apiService = widget.homeApiService ?? sl<HomeApiService>();
+    final repository = HomeRepositoryImpl(apiService: apiService);
+    final overview = await repository.getHomeOverview();
     if (!mounted) return;
     setState(() {
-      _places = results[0];
-      _categories = results[1];
+      _places = overview.featuredPlaces;
+      _categories = overview.categories;
       _isLoading = false;
     });
   }
@@ -402,7 +405,7 @@ class _HomePageState extends State<HomePage> {
         separatorBuilder: (_, __) => AppSpacing.gapXs,
         itemBuilder: (context, i) {
           final cat = _categories[i];
-          final name = cat['name'] ?? '';
+          final name = cat.name;
           final selected = _selectedCategoryIndex == i;
           return GestureDetector(
             onTap: () => setState(() {
@@ -500,14 +503,11 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _placeCard(Map<String, dynamic> place) {
-    final name = place['name'] ?? '';
-    final address = place['address_raw'] ?? '';
-    final images = place['images'] as List<dynamic>?;
-    final hasImage = images != null && images.isNotEmpty;
-    final imageUrl = hasImage ? images[0]['image_url'] as String? : null;
-    final category = place['category'] as Map<String, dynamic>?;
-    final categoryName = category?['name'] as String?;
+  Widget _placeCard(PlaceEntity place) {
+    final name = place.name;
+    final address = place.addressRaw ?? '';
+    final imageUrl = place.imageUrl;
+    final categoryName = place.categoryId;
 
     return GestureDetector(
       onTap: _showFeatureInDev,

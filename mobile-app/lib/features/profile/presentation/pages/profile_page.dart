@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/api/api_client.dart';
+import '../../../../core/di/app_module.dart';
 import '../../../../core/localization/app_localizations_vi.dart';
 import '../../../../core/store/app_state.dart';
 import '../../../../core/store/store_provider.dart';
@@ -14,13 +15,13 @@ import '../../../settings/domain/entities/app_settings_entity.dart';
 import '../../../settings/domain/usecases/get_app_settings_usecase.dart';
 
 class ProfilePage extends StatefulWidget {
-  final AuthController controller;
+  final AuthController? controller;
   final GetAppSettingsUseCase? getAppSettingsUseCase;
   final bool showBackButton;
 
   const ProfilePage({
     super.key,
-    required this.controller,
+    this.controller,
     this.getAppSettingsUseCase,
     this.showBackButton = true,
   });
@@ -32,6 +33,8 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   late final GetAppSettingsUseCase _getAppSettingsUseCase;
   AppSettingsEntity _settings = AppSettingsEntity.defaultSettings();
+
+  AuthController get _authController => widget.controller ?? sl<AuthController>();
 
   @override
   void initState() {
@@ -48,7 +51,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _fetchProfile() async {
-    final ok = await widget.controller.checkLoginStatus();
+    final ok = await _authController.checkLoginStatus();
     if (!ok && mounted) {
       showAppSnackBar(context, AppLocalizationsVi.errorUnauthorized,
           isError: true);
@@ -96,7 +99,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
 
     if (confirm == true) {
-      await widget.controller.logout();
+      await _authController.logout();
       if (mounted) {
         Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
       }

@@ -13,6 +13,7 @@ type ICategoryRepository interface {
 	Create(ctx context.Context, cat *models.Category) error
 	FindByID(ctx context.Context, id uuid.UUID) (*models.Category, error)
 	FindAll(ctx context.Context, query dto.CategoryQuery) ([]models.Category, int64, error)
+	FindAllActive(ctx context.Context) ([]models.Category, error)
 	Update(ctx context.Context, cat *models.Category) error
 	Delete(ctx context.Context, id uuid.UUID) error
 }
@@ -62,6 +63,14 @@ func (r *CategoryRepository) FindAll(ctx context.Context, query dto.CategoryQuer
 	}
 
 	return categories, total, nil
+}
+
+func (r *CategoryRepository) FindAllActive(ctx context.Context) ([]models.Category, error) {
+	var categories []models.Category
+	err := r.db.WithContext(ctx).
+		Where("status = ?", models.StatusActive).
+		Find(&categories).Error
+	return categories, err
 }
 
 func (r *CategoryRepository) Update(ctx context.Context, cat *models.Category) error {

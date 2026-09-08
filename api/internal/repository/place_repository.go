@@ -14,6 +14,7 @@ type IPlaceRepository interface {
 	Create(ctx context.Context, p *models.Place) error
 	FindByID(ctx context.Context, id uuid.UUID) (*models.Place, error)
 	FindAll(ctx context.Context, query dto.PlaceQuery) ([]models.Place, int64, error)
+	FindFeatured(ctx context.Context, limit int) ([]models.Place, error)
 	Update(ctx context.Context, p *models.Place) error
 	Delete(ctx context.Context, id uuid.UUID) error
 }
@@ -69,6 +70,17 @@ func (r *PlaceRepository) FindAll(ctx context.Context, query dto.PlaceQuery) ([]
 	}
 
 	return places, total, nil
+}
+
+func (r *PlaceRepository) FindFeatured(ctx context.Context, limit int) ([]models.Place, error) {
+	var places []models.Place
+	err := r.db.WithContext(ctx).
+		Preload("Division").Preload("Category").
+		Where("status = ?", models.StatusActive).
+		Order("created_at DESC").
+		Limit(limit).
+		Find(&places).Error
+	return places, err
 }
 
 func (r *PlaceRepository) Update(ctx context.Context, p *models.Place) error {

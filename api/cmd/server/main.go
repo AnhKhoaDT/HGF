@@ -64,6 +64,7 @@ func main() {
 	catService := services.NewCategoryService(catRepo)
 	placeService := services.NewPlaceService(placeRepo)
 	settingService := services.NewSettingService()
+	homeService := services.NewHomeService(placeRepo, catRepo)
 
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(authService)
@@ -72,9 +73,10 @@ func main() {
 	categoryHandler := handlers.NewCategoryHandler(catService)
 	placeHandler := handlers.NewPlaceHandler(placeService)
 	settingHandler := handlers.NewSettingHandler(settingService)
+	homeHandler := handlers.NewHomeOverviewHandler(homeService)
 
 	// Setup Router
-	r := router.SetupRouter(authHandler, authService, uploadHandler, adminDivHandler, categoryHandler, placeHandler, settingHandler)
+	r := router.SetupRouter(authHandler, authService, uploadHandler, adminDivHandler, categoryHandler, placeHandler, settingHandler, homeHandler)
 
 	// Start server
 	port := config.App.HttpServer.Port

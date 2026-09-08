@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/di/app_module.dart';
 import '../../../../core/localization/app_localizations_vi.dart';
 import '../../../../core/services/biometric_service.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -8,8 +9,8 @@ import '../../../../shared/widgets/widgets.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 
 class SecuritySettingsPage extends StatefulWidget {
-  final AuthController controller;
-  const SecuritySettingsPage({super.key, required this.controller});
+  final AuthController? controller;
+  const SecuritySettingsPage({super.key, this.controller});
 
   @override
   State<SecuritySettingsPage> createState() => _SecuritySettingsPageState();
@@ -20,6 +21,8 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
   bool _isBiometricEnabled = false;
   bool _isBiometricSupported = false;
 
+  AuthController get _authController => widget.controller ?? sl<AuthController>();
+
   @override
   void initState() {
     super.initState();
@@ -28,7 +31,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
 
   Future<void> _loadSettings() async {
     final enabled =
-        await widget.controller.apiService.isBiometricEnabled();
+        await _authController.apiService.isBiometricEnabled();
     final supported = await _biometricService.isBiometricAvailable();
 
     if (mounted) {
@@ -65,13 +68,13 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
         return;
       }
 
-      await widget.controller.apiService.setBiometricEnabled(true);
+      await _authController.apiService.setBiometricEnabled(true);
       if (mounted) {
         setState(() => _isBiometricEnabled = true);
         showAppSnackBar(context, AppLocalizationsVi.biometricEnabledSuccess);
       }
     } else {
-      await widget.controller.apiService.setBiometricEnabled(false);
+      await _authController.apiService.setBiometricEnabled(false);
       if (mounted) {
         setState(() => _isBiometricEnabled = false);
         showAppSnackBar(context, AppLocalizationsVi.biometricDisabledSuccess);

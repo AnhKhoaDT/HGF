@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/di/app_module.dart';
 import '../../../../core/localization/app_localizations_vi.dart';
 import '../../../../core/store/app_state.dart';
 import '../../../../core/store/store_provider.dart';
@@ -11,8 +12,8 @@ import '../../../../core/services/biometric_service.dart';
 import '../controllers/auth_controller.dart';
 
 class LoginPage extends StatefulWidget {
-  final AuthController controller;
-  const LoginPage({super.key, required this.controller});
+  final AuthController? controller;
+  const LoginPage({super.key, this.controller});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -29,6 +30,8 @@ class _LoginPageState extends State<LoginPage> {
   String? _savedPassword;
   bool _canUseBiometric = false;
 
+  AuthController get _controller => widget.controller ?? sl<AuthController>();
+
   @override
   void initState() {
     super.initState();
@@ -36,22 +39,27 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _loadSavedAccount() async {
-    final account = await widget.controller.apiService.getSavedAccount();
+    final account = await _controller.apiService.getSavedAccount();
     final isBioEnabled =
-        await widget.controller.apiService.isBiometricEnabled();
+        await _controller.apiService.isBiometricEnabled();
     final isBioAvailable = await _biometricService.isBiometricAvailable();
 
     if (mounted) {
       setState(() {
-        if (account != null) {
-          _hasSavedAccount = true;
-          _savedEmail = account['email'];
-          _savedPassword = account['password'];
-          _emailController.text = _savedEmail ?? '';
+        _hasSavedAccount = account != null;
+        _savedEmail = account?['email'];
+        _savedPassword = account?['password'];
+        _canUseBiometric =
+            _hasSavedAccount && isBioEnabled && isBioAvailable;
+        if (_hasSavedAccount && _savedEmail != null) {
+          _emailController.text = _savedEmail!;
         }
-        _canUseBiometric = _hasSavedAccount && isBioEnabled && isBioAvailable;
       });
     }
+  }
+
+  void _onLoginPressed() {
+    _handleLogin();
   }
 
   Future<void> _showClearAccountDialog() async {
@@ -87,7 +95,7 @@ class _LoginPageState extends State<LoginPage> {
     );
 
     if (confirm == true) {
-      await widget.controller.apiService.clearSavedAccount();
+      await _controller.apiService.clearSavedAccount();
       if (!mounted) return;
       setState(() {
         _hasSavedAccount = false;
@@ -133,7 +141,7 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final ok = await widget.controller.login(
+    final ok = await _controller.login(
       email: _emailController.text.trim(),
       password: _passwordController.text,
     );
@@ -143,7 +151,7 @@ class _LoginPageState extends State<LoginPage> {
       showAppSnackBar(context, AppLocalizationsVi.loginSuccess);
       Navigator.of(context).pushNamedAndRemoveUntil('/home', (r) => false);
     } else {
-      final msg = widget.controller.store.state.auth.errorMessage ??
+      final msg = _controller.store.state.auth.errorMessage ??
           AppLocalizationsVi.loginFailed;
       showAppSnackBar(context, msg, isError: true);
     }

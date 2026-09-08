@@ -65,11 +65,25 @@ func (pm PlaceMetadata) Value() (driver.Value, error) {
 type DescriptionJSON map[string]interface{}
 
 func (dj *DescriptionJSON) Scan(value interface{}) error {
-	bytes, ok := value.([]byte)
-	if !ok {
-		return errors.New("type assertion to []byte failed")
+	if value == nil {
+		*dj = make(DescriptionJSON)
+		return nil
 	}
-	return json.Unmarshal(bytes, dj)
+	var bytes []byte
+	switch v := value.(type) {
+	case []byte:
+		bytes = v
+	case string:
+		bytes = []byte(v)
+	default:
+		return errors.New("type assertion to []byte or string failed")
+	}
+
+	if err := json.Unmarshal(bytes, dj); err != nil {
+		*dj = DescriptionJSON{"text": string(bytes)}
+		return nil
+	}
+	return nil
 }
 
 func (dj DescriptionJSON) Value() (driver.Value, error) {

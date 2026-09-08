@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/di/app_module.dart';
 import '../../../../core/localization/app_localizations_vi.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimensions.dart';
@@ -7,8 +8,8 @@ import '../../../../shared/widgets/widgets.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 
 class WelcomePage extends StatefulWidget {
-  final AuthController controller;
-  const WelcomePage({super.key, required this.controller});
+  final AuthController? controller;
+  const WelcomePage({super.key, this.controller});
 
   @override
   State<WelcomePage> createState() => _WelcomePageState();
@@ -24,7 +25,8 @@ class _WelcomePageState extends State<WelcomePage> {
   }
 
   Future<void> _checkAuth() async {
-    final isLoggedIn = await widget.controller.checkLoginStatus();
+    final ctrl = widget.controller ?? sl<AuthController>();
+    final isLoggedIn = await ctrl.checkLoginStatus();
     if (!mounted) return;
     if (isLoggedIn) {
       Navigator.pushReplacementNamed(context, '/home');

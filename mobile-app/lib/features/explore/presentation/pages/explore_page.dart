@@ -1,23 +1,30 @@
 import 'package:flutter/material.dart';
+import '../../../../core/di/app_module.dart';
 import '../../../../core/localization/app_localizations_vi.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../shared/widgets/widgets.dart';
-import '../../data/services/home_api_service.dart';
+import '../../../categories/data/repositories/categories_repository_impl.dart';
+import '../../../categories/data/services/categories_api_service.dart';
+import '../../../categories/domain/entities/category_entity.dart';
+import '../../../home/data/services/home_api_service.dart';
+import '../../../places/data/repositories/places_repository_impl.dart';
+import '../../../places/data/services/places_api_service.dart';
+import '../../../places/domain/entities/place_entity.dart';
 
 class ExplorePage extends StatefulWidget {
-  final HomeApiService homeApiService;
+  final HomeApiService? homeApiService;
 
-  const ExplorePage({super.key, required this.homeApiService});
+  const ExplorePage({super.key, this.homeApiService});
 
   @override
   State<ExplorePage> createState() => _ExplorePageState();
 }
 
 class _ExplorePageState extends State<ExplorePage> {
-  List<Map<String, dynamic>> _places = [];
-  List<Map<String, dynamic>> _categories = [];
+  List<PlaceEntity> _places = [];
+  List<CategoryEntity> _categories = [];
   bool _isLoading = true;
   int _selectedCategoryIndex = -1;
 
@@ -29,14 +36,24 @@ class _ExplorePageState extends State<ExplorePage> {
 
   Future<void> _fetchData() async {
     setState(() => _isLoading = true);
+    final apiService = widget.homeApiService ?? sl<HomeApiService>();
+    // Explore calls dedicated Places & Categories Repositories
+    final placesRepo = PlacesRepositoryImpl(
+      apiService: PlacesApiService(apiClient: apiService.apiClient),
+    );
+    final categoriesRepo = CategoriesRepositoryImpl(
+      apiService: CategoriesApiService(apiClient: apiService.apiClient),
+    );
+
     final results = await Future.wait([
-      widget.homeApiService.fetchFeaturedPlaces(limit: 20),
-      widget.homeApiService.fetchCategories(),
+      placesRepo.getPlaces(limit: 20),
+      categoriesRepo.getCategories(),
     ]);
+
     if (!mounted) return;
     setState(() {
-      _places = results[0];
-      _categories = results[1];
+      _places = results[0] as List<PlaceEntity>;
+      _categories = results[1] as List<CategoryEntity>;
       _isLoading = false;
     });
   }
@@ -90,7 +107,7 @@ class _ExplorePageState extends State<ExplorePage> {
         separatorBuilder: (_, __) => AppSpacing.gapXs,
         itemBuilder: (context, i) {
           final cat = _categories[i];
-          final name = cat['name'] ?? '';
+          final name = cat.name;
           final selected = _selectedCategoryIndex == i;
           return GestureDetector(
             onTap: () => setState(() {
@@ -174,12 +191,9 @@ class _ExplorePageState extends State<ExplorePage> {
       itemCount: _places.length,
       itemBuilder: (context, i) {
         final place = _places[i];
-        final name = place['name'] ?? '';
-        final address = place['address_raw'] ?? '';
-        final images = place['images'] as List<dynamic>?;
-        final imageUrl = images != null && images.isNotEmpty
-            ? images[0]['image_url'] as String?
-            : null;
+        final name = place.name;
+        final address = place.addressRaw ?? '';
+        final imageUrl = place.imageUrl;
 
         return GestureDetector(
           onTap: _showFeatureInDev,

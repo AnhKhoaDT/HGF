@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/di/app_module.dart';
 import '../../../../core/localization/app_localizations_vi.dart';
 import '../../../../core/store/app_state.dart';
 import '../../../../core/store/store_provider.dart';
@@ -11,8 +12,8 @@ import '../../../../shared/widgets/widgets.dart';
 import '../controllers/auth_controller.dart';
 
 class SignUpPage extends StatefulWidget {
-  final AuthController controller;
-  const SignUpPage({super.key, required this.controller});
+  final AuthController? controller;
+  const SignUpPage({super.key, this.controller});
 
   @override
   State<SignUpPage> createState() => _SignUpPageState();
@@ -27,6 +28,8 @@ class _SignUpPageState extends State<SignUpPage> {
   final _confirmPasswordController = TextEditingController();
 
   bool _acceptedTerms = false;
+
+  AuthController get _controller => widget.controller ?? sl<AuthController>();
 
   @override
   void dispose() {
@@ -46,7 +49,7 @@ class _SignUpPageState extends State<SignUpPage> {
     }
     if (!_formKey.currentState!.validate()) return;
 
-    final ok = await widget.controller.register(
+    final ok = await _controller.register(
       fullName: _fullNameController.text.trim(),
       username: _usernameController.text.trim(),
       email: _emailController.text.trim(),
@@ -58,7 +61,7 @@ class _SignUpPageState extends State<SignUpPage> {
       showAppSnackBar(context, AppLocalizationsVi.signUpSuccess);
       Navigator.of(context).pop();
     } else {
-      final msg = widget.controller.store.state.auth.errorMessage ??
+      final msg = _controller.store.state.auth.errorMessage ??
           AppLocalizationsVi.signUpFailed;
       showAppSnackBar(context, msg, isError: true);
     }

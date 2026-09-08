@@ -1,47 +1,23 @@
+import 'package:flutter/foundation.dart';
 import '../../../../core/api/api_client.dart';
+import '../models/home_overview_model.dart';
 
 class HomeApiService {
   final ApiClient _apiClient;
 
   HomeApiService({required ApiClient apiClient}) : _apiClient = apiClient;
 
-  Future<List<Map<String, dynamic>>> fetchFeaturedPlaces({int limit = 5}) async {
-    try {
-      final response = await _apiClient.dio.get(
-        '/places',
-        queryParameters: {
-          'limit': limit,
-          'status': 'active',
-          'page': 1,
-        },
-      );
-      final data = response.data['data'];
-      if (data == null) return [];
-      final items = data['items'];
-      if (items == null) return [];
-      return List<Map<String, dynamic>>.from(items);
-    } catch (_) {
-      return [];
-    }
-  }
+  ApiClient get apiClient => _apiClient;
 
-  Future<List<Map<String, dynamic>>> fetchCategories() async {
+  Future<HomeOverviewModel> fetchHomeOverview() async {
     try {
-      final response = await _apiClient.dio.get(
-        '/categories',
-        queryParameters: {
-          'status': 'active',
-          'limit': 20,
-          'page': 1,
-        },
-      );
-      final data = response.data['data'];
-      if (data == null) return [];
-      final items = data['items'];
-      if (items == null) return [];
-      return List<Map<String, dynamic>>.from(items);
-    } catch (_) {
-      return [];
+      final response = await _apiClient.dio.get('/home/overview');
+      if (response.data != null && response.data['data'] != null) {
+        return HomeOverviewModel.fromJson(response.data as Map<String, dynamic>);
+      }
+    } catch (e) {
+      debugPrint(e.toString());
     }
+    return const HomeOverviewModel();
   }
 }

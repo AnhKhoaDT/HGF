@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimensions.dart';
 
-/// Logo thương hiệu dùng chung (icon lá trong khung bo tròn + chữ TripWise).
 class AppLogo extends StatelessWidget {
   final double size;
   final bool showWordmark;
